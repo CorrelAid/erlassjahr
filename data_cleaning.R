@@ -1,19 +1,40 @@
+##--------------------##
+## CorrelAid Project: ##
+##    erlassjahr.de   ##
+##--------------------##
+##    Data Cleaning   ##
+##--------------------##
+
+##--------------##
+## Prerequisits ##
+##--------------##
+
+# Dependencies 
+library(readxl)
 library(countrycode)
 library(tidyverse)
 library(magrittr)
+
+# Load data
+
+# IMPORTANT: Trend variable will be read as POSCIX variable due to its pre-defined format in the orginial data source
+#            I manually changed this in the excel file to work with the data in R.
+
 sr19_erlassjahr <- read_xlsx("~/Downloads/SR19 Überblickstabelle.xlsx")
-sr19_erlassjahr <- sr19_erlassjahr[2:127,1:17]
+sr19_erlassjahr <- sr19_erlassjahr[2:127,1:17] # keep only relevant variables and rows that contain data points
 
-custom_match <- c("Moldawien" = "MDA")
-sr19_erlassjahr$Land <- countrycode::countrycode(sr19_erlassjahr$Land, 
-                                                 "country.name.de", "iso3c", custom_match = custom_match)
+##----------------------##
+##  Basic Data Cleaning ##
+##----------------------##
 
+# Rename variables 
 names(sr19_erlassjahr)[8] <- "foreign_debt_exp"
 names(sr19_erlassjahr)[10] <- "external_debt_service_exp"
 
 sr19_erlassjahr %<>% 
   filter(!is.na(Land)) %>% 
-  rename(public_debt_bip = `Öffentliche Schulden / BIP`,
+  rename(country = `Land`,
+         public_debt_bip = `Öffentliche Schulden / BIP`,
          trend_pdb = `Trend1`,
          public_debt_state_rev = `Öffentliche Schulden / Staatseinnahmen`,
          trend_pdsr = `Trend12`,
@@ -28,7 +49,27 @@ sr19_erlassjahr %<>%
          income = `Income`,
          trend = `Trend`)
 
+# Turn character into numeric
+sr19_erlassjahr$foreign_debt_bip <- as.numeric(sr19_erlassjahr$foreign_debt_bip)
+sr19_erlassjahr$foreign_debt_exp <- as.numeric(sr19_erlassjahr$foreign_debt_exp)
+sr19_erlassjahr$external_debt_service_exp <- as.numeric(sr19_erlassjahr$external_debt_service_exp)
 
+# Convert German country names to ISO3c codes
+custom_match <- c("Moldawien" = "MDA")
+sr19_erlassjahr$country <- countrycode::countrycode(sr19_erlassjahr$country, 
+                                                 "country.name.de", "iso3c", custom_match = custom_match)
+
+##--------------------##
+##  Rescale Variables ##
+##--------------------##
+
+####################
+## Debt Situation ##
+####################
+
+## Create five categories for debt situation
+
+# Function to recode the five indicators according to the coding scheme in Schuldenreport 2020 (page 17)
 filter_recode <- function(var, filter) {
   var <- ifelse(var < filter[1],
                 0,
@@ -46,18 +87,25 @@ filter_recode <- function(var, filter) {
   return(var)
 }
 
+# Define thresholds for each filter category
 public_debt_bip_filter <- c(50, 75, 100)
 public_debt_state_rev_filter <- c(200, 300, 400)
 foreign_debt_bip_filter <- c(40, 60, 80)
 foreign_debt_exp_filter <- c(150, 225, 300)
 external_debt_service_exp_filter <- c(15, 22.5, 30)
 
+# Apply filter categories and recode function to each of the five category variables
 sr19_erlassjahr$public_debt_bip2 <- filter_recode(sr19_erlassjahr$public_debt_bip, public_debt_bip_filter)
 sr19_erlassjahr$public_debt_state_rev2 <- filter_recode(sr19_erlassjahr$public_debt_state_rev, public_debt_state_rev_filter)
 sr19_erlassjahr$foreign_debt_bip2 <- filter_recode(sr19_erlassjahr$foreign_debt_bip, foreign_debt_bip_filter)
 sr19_erlassjahr$foreign_debt_exp2 <- filter_recode(sr19_erlassjahr$foreign_debt_exp, foreign_debt_exp_filter)
 sr19_erlassjahr$external_debt_service_exp2 <- filter_recode(sr19_erlassjahr$external_debt_service_exp, external_debt_service_exp_filter)
 
+############
+## Trend ##
+###########
+
+# Define a function to rescale the + and - signs in the trend variables to numeric outputs
 trend_recode <- function(var){
   var <- ifelse(
     is.na(var),
@@ -75,8 +123,11 @@ trend_recode <- function(var){
   var <- as.numeric(var)
 }
 
+# Apply function to all 5 trend variables
 sr19_erlassjahr$trend_pdb <- trend_recode(sr19_erlassjahr$trend_pdb)
 sr19_erlassjahr$trend_pdsr <- trend_recode(sr19_erlassjahr$trend_pdsr)
 sr19_erlassjahr$trend_fdp <- trend_recode(sr19_erlassjahr$trend_fdp)
 sr19_erlassjahr$trend_fde <- trend_recode(sr19_erlassjahr$trend_fde)
 sr19_erlassjahr$trend_edse <- trend_recode(sr19_erlassjahr$trend_edse)
+
+
