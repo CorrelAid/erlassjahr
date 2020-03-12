@@ -20,7 +20,7 @@ library(magrittr)
 # IMPORTANT: Trend variable will be read as POSCIX variable due to its pre-defined format in the orginial data source
 #            I manually changed this in the excel file to work with the data in R.
 
-sr19_erlassjahr <- read_xlsx("~/Downloads/SR19 Überblickstabelle.xlsx")
+sr19_erlassjahr <- read_xlsx("SR19 Überblickstabelle.xlsx")
 sr19_erlassjahr <- sr19_erlassjahr[2:127,1:17] # keep only relevant variables and rows that contain data points
 
 ##----------------------##
