@@ -1,26 +1,45 @@
+##--------------------------------------------------##
+## CorrelAid Project:                               ##
+##    erlassjahr.de                                 ##
+##--------------------------------------------------##
+##  Shiny UI    
+##  1. Prerequisits
+##  2. Load Data
+##  3. UI Interface
+##  4. Server
+##  5. Run app
+##--------------------------------------------------##
+
+
+##--------------------------------------------------##
+## Prerequisits                                     ##
+##--------------------------------------------------##
+
 library(shiny)
 library(DT)
 library(rgdal)
 library(leaflet)
-#library(raster)
 
+##--------------------------------------------------##
+## Load Data                                        ##
+##--------------------------------------------------##
+
+# Map Data / Shape File
 shape_path <- "./ne_50m_admin_0_countries.shp"
 encoding <- "UTF-8"
 
-### Read Shapefile
 map <- readOGR(dsn=path.expand(shape_path), layer="ne_50m_admin_0_countries", encoding = encoding)
 
-### Read Data and Rename Vars for Test app
-# Reading in the excel table does give an error when running the Shiny app
-# library("readxl")
-# data <- read_excel("./SR19 Überblickstabelle.xlsx") 
-data <- read.csv("./SR19 Überblickstabelle.csv")
-data <- plyr::rename(data, c( "Land" = "NAME_DE", "Öffentliche.Schulden...BIP" = "Oeff.Schuld.Bip", 
-                              "Öffentliche.Schulden...Staatseinnahmen" = "Oeff.Schuld.StaatEin"))
+# Convert Data from data_cleaning.R into csv File
+write.csv(sr19_erlassjahr, "./sr19_erlassjahr.csv")
+data <- read.csv("./sr19_erlassjahr.csv")
+data <- plyr::rename(data, c("country" = "NAME_DE"))
 
 
+##--------------------------------------------------##
+## User Interface Shiny                             ##
+##--------------------------------------------------##
 
-# ui object
 ui <- fluidPage(
   titlePanel(p("Erlassjahr app", style = "color:#3474A7")),
   sidebarLayout(
@@ -29,7 +48,8 @@ ui <- fluidPage(
       selectInput(
         inputId = "variableselected",
         label = "Schuldenindikator Wählen",
-        choices = c("Oeff.Schuld.Bip", "Oeff.Schuld.StaatEin", "Verschuldungs.situation", "Auslandsschuldenstand...Export.einnahmen", "Auslandsschuldenstand...BIP", "Auslandsschuldendienst...Export.einnahmen" )
+        choices = c("public_debt_bip", "public_debt_state_rev", "foreign_debt_exp", 
+                    "risk_excessive_debt", "external_debt_service_exp")
       )
     ),
     mainPanel(
@@ -66,9 +86,13 @@ server <- function(input, output) {
         fillColor = ~ pal(variableplot),
         color = "white",
         dashArray = "1",
+        weight = 0.1, 
+        smoothFactor = 0.5,
+        opacity = 1.0,
         fillOpacity = 0.7,
         label = labels
       ) %>%
+      setView( 0, 0, 2 ) %>%
       leaflet::addLegend(
         pal = pal, values = ~variableplot,
         opacity = 0.7, title = NULL
