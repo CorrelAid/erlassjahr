@@ -4,10 +4,20 @@ library(rgdal)
 library(leaflet)
 #library(raster)
 
-data <- read.csv('C:/Users/scher/Documents/Data AS/Projekt Erlassjahr/Data/SR19 �berblickstabelle.csv')
-shape_path <- "C:/Users/scher/Documents/Data AS/Projekt Erlassjahr/NatEarth/ne_50m_admin_0_countries.shp"
+shape_path <- "./ne_50m_admin_0_countries.shp"
 encoding <- "UTF-8"
+
+### Read Shapefile
 map <- readOGR(dsn=path.expand(shape_path), layer="ne_50m_admin_0_countries", encoding = encoding)
+
+### Read Data and Rename Vars for Test app
+# Reading in the excel table does give an error when running the Shiny app
+# library("readxl")
+# data <- read_excel("./SR19 Überblickstabelle.xlsx") 
+data <- read.csv("./SR19 Überblickstabelle.csv")
+data <- plyr::rename(data, c( "Land" = "NAME_DE", "Öffentliche.Schulden...BIP" = "Oeff.Schuld.Bip", 
+                              "Öffentliche.Schulden...Staatseinnahmen" = "Oeff.Schuld.StaatEin"))
+
 
 
 # ui object
@@ -18,14 +28,14 @@ ui <- fluidPage(
       p("Made with Shiny"),
       selectInput(
         inputId = "variableselected",
-        label = "Select variable",
-        choices = c("Verschuldungs.situation", "Trend")
+        label = "Schuldenindikator Wählen",
+        choices = c("Oeff.Schuld.Bip", "Oeff.Schuld.StaatEin", "Verschuldungs.situation", "Auslandsschuldenstand...Export.einnahmen", "Auslandsschuldenstand...BIP", "Auslandsschuldendienst...Export.einnahmen" )
       )
     ),
     mainPanel(
       
-      leafletOutput(outputId = "map"),
-      DTOutput(outputId = "table")
+      leafletOutput(outputId = "map") #,
+      #DTOutput(outputId = "table")
 
     )
   )
@@ -33,7 +43,7 @@ ui <- fluidPage(
 
 # server()
 server <- function(input, output) {
-  output$table <- renderDT(data)
+  #output$table <- renderDT(data)
   output$map <- renderLeaflet({
     
     # Add data to map
@@ -55,7 +65,7 @@ server <- function(input, output) {
       addPolygons(
         fillColor = ~ pal(variableplot),
         color = "white",
-        dashArray = "3",
+        dashArray = "1",
         fillOpacity = 0.7,
         label = labels
       ) %>%
@@ -68,4 +78,4 @@ server <- function(input, output) {
 
 # shinyApp()
 shinyApp(ui = ui, server = server)
-runApp('C:/Users/scher/Documents/Data AS/Projekt Erlassjahr/appdir/app.R')
+runApp('./app.R')
