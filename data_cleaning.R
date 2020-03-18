@@ -59,6 +59,20 @@ custom_match <- c("Moldawien" = "MDA")
 sr19_erlassjahr$country <- countrycode::countrycode(sr19_erlassjahr$country, 
                                                  "country.name.de", "iso3c", custom_match = custom_match)
 
+# Add regions to the dataframe
+sr19_erlassjahr$region <- countrycode::countrycode(sr19_erlassjahr$country, "iso3c", "region")
+
+sr19_erlassjahr$region_large <- ifelse(sr19_erlassjahr$region %in% c("Eastern Africa", "Western Africa", "Middle Africa", "Southern Africa"), "Sub-Saharan Africa", NA)
+sr19_erlassjahr$region_large <- ifelse(sr19_erlassjahr$region %in% c("Australia and New Zealand", "Micronesia", "Melanesia", "Polynesia"), "Oceania", sr19_erlassjahr$region_large)
+sr19_erlassjahr$region_large <- ifelse(sr19_erlassjahr$region %in% c("Central Asia", "Eastern Asia", "South-Eastern Asia", "Southern Asia"), "Asia", sr19_erlassjahr$region_large)
+sr19_erlassjahr$region_large <- ifelse(sr19_erlassjahr$region %in% c("Eastern Europe", "Northern Europe", "Southern Europe", "Western Europe") | sr19_erlassjahr$country %in% c("CAN","CYP"), "Europe", sr19_erlassjahr$region_large)
+sr19_erlassjahr$region_large <- ifelse(sr19_erlassjahr$region %in% c("Caribbean", "Central America", "South America"), "Latin America", sr19_erlassjahr$region_large)
+sr19_erlassjahr$region_large <- ifelse(sr19_erlassjahr$region %in% c("Western Asia", "Northern Africa") | sr19_erlassjahr$country %in% c("AFG","IRN"), "Middle East" , sr19_erlassjahr$region_large)
+sr19_erlassjahr$region_large <- ifelse(sr19_erlassjahr$region == "Northern America", "North America", sr19_erlassjahr$region_large)
+
+# remove ambiguous states
+sr19_erlassjahr <- sr19_erlassjahr[!is.na(sr19_erlassjahr$country), ]
+
 ##--------------------##
 ##  Rescale Variables ##
 ##--------------------##
