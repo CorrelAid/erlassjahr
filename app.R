@@ -54,15 +54,15 @@ ui <- fluidPage(
       selectInput(
         inputId = "var_debtindikator",
         label = "Schuldenindikator Wählen",
-        choices = c("public_debt_bip2", "public_debt_state_rev2", "foreign_debt_exp2", 
-                    "risk_excessive_debt2", "external_debt_service_exp2")
+        choices = c("public_debt_bip2", "public_debt_state_rev2", "foreign_debt_bip2", 
+                    "foreign_debt_exp2", "external_debt_service_exp2")
       ), # ADD AGGREGATED OPTION AS COLUM IN DATAFRAME
       
       # drop down input selection income category
       selectInput(
         inputId = "var_income",
         label = "Einkommenskategorie wählen",
-        choices = c("L", "LM", "UM", "NA")
+        choices = c("Alle","L", "LM", "UM", "NA")
       ),
         # drop down input selection Region
         selectInput("var_region", 
@@ -84,27 +84,47 @@ ui <- fluidPage(
   )
 )
 
-# server()
+##--------------------------------------------------##
+## Farbcodierung Karte                              ##
+##--------------------------------------------------##
+
+s.kritisch <- "#E61700"
+kritisch <- "#FF8040"
+l.kritisch <- "#FFCC99"
+n.kritisch <- "#C5C7B8"
+k.Daten <- "#808080"
+nT.Analyse <-  "#F0F2E8"
+hint.grnd <- " #B3F0D4"
+
+##--------------------------------------------------##
+## Server für Shiny Map                             ##
+##--------------------------------------------------##
+
 server <- function(input, output) {
   #output$table <- renderDT(data)
   
   filteredData <- reactive({
+    if (input$var_income == "Alle") {
+      subset(data, income == income) 
+    } else {
     subset(data, income == input$var_income)
+    }
     # add regional input when constructed columns with region input
   })
   
   output$map <- renderLeaflet({
     
-    # Add data to map
+    # Add data to map, if option "Alle" is true select all data
     datafiltered <- filteredData()
+ 
     ordercounties <- match(map@data$NAME_DE, datafiltered$NAME_DE)
     map@data <- datafiltered[ordercounties, ]
     
-    map$variableplot <- as.numeric(
-      map@data[, input$var_debtindikator])
+    map$variableplot <- map@data[, input$var_debtindikator]
     
     # Create leaflet
-    pal <- colorFactor("YlOrRd", domain = map$variableplot)
+    pal <- colorFactor(c(n.kritisch, l.kritisch, kritisch, s.kritisch
+                         ), levels = c(0, 1, 2, 3), na.color = "#808080" )
     
     labels <- sprintf("%s: %g", map$NAME_DE, map$variableplot) %>%
       lapply(htmltools::HTML)
@@ -112,7 +132,7 @@ server <- function(input, output) {
     l <- leaflet(map) %>% 
       addTiles() %>%
       addPolygons(
-        fillColor = ~ pal(variableplot),
+        fillColor = ~pal(variableplot),
         color = "white",
         dashArray = "1",
         weight = 0.1, 
@@ -123,8 +143,14 @@ server <- function(input, output) {
       ) %>%
       setView( 0, 0, 2 ) %>%
       leaflet::addLegend(position = "bottomright",
-        pal = pal, values = ~variableplot,
-        opacity = 0.7, title = NULL
+        # Specify colors manually b/c pal function does not show colors in legend
+        colors = c(s.kritisch, kritisch,  l.kritisch, n.kritisch ), 
+        values = c("sehr kritisch", "kritisch", "leicht kritisch",
+                              "nicht kritisch", "keine Daten vorhanden"),
+        na.label = "keine Daten vorhanden",
+        opacity = 0.7, title = "Verschuldungssituation",
+         labels = c("sehr kritisch", "kritisch", "leicht kritisch",
+                    "nicht kritisch")
       )
   })
   
