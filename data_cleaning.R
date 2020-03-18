@@ -115,6 +115,27 @@ sr19_erlassjahr$foreign_debt_bip2 <- filter_recode(sr19_erlassjahr$foreign_debt_
 sr19_erlassjahr$foreign_debt_exp2 <- filter_recode(sr19_erlassjahr$foreign_debt_exp, foreign_debt_exp_filter)
 sr19_erlassjahr$external_debt_service_exp2 <- filter_recode(sr19_erlassjahr$external_debt_service_exp, external_debt_service_exp_filter)
 
+# Verschuldungssituation variable
+sr19_erlassjahr$debt_sit_total <- rowSums(sr19_erlassjahr[, c(20:24)], na.rm = TRUE)
+sr19_erlassjahr$debt_sit_cat <-
+  ifelse(
+    sr19_erlassjahr$debt_sit_total == 0,
+    0,
+    ifelse(
+      sr19_erlassjahr$debt_sit_total > 0 &
+        sr19_erlassjahr$debt_sit_total < 5,
+      1,
+      ifelse(
+        sr19_erlassjahr$debt_sit_total >= 5 &
+          sr19_erlassjahr$debt_sit_total < 10,
+        2,
+        ifelse(sr19_erlassjahr$debt_sit_total >= 10, 3, NA)
+      )
+    )
+  )
+
+sr19_erlassjahr$debt_sit_cat <- factor(sr19_erlassjahr$debt_sit_cat)
+levels(sr19_erlassjahr$debt_sit_cat) <- c("nicht kritisch", "leicht kritisch", "kritisch", "sehr kritisch")
 ############
 ## Trend ##
 ###########
