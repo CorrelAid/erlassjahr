@@ -126,20 +126,31 @@ server <- function(input, output) {
     pal <- colorFactor(c(n.kritisch, l.kritisch, kritisch, s.kritisch
                          ), levels = c(0, 1, 2, 3), na.color = "#808080" )
     
-    labels <- sprintf("%s: %g", map$NAME_DE, map$variableplot) %>%
+    # labels <- sprintf("%s: %g", map$NAME_DE, map$variableplot) %>%
+    #   lapply(htmltools::HTML)
+    
+    mytext <- paste0(
+      "<b>", map@data$NAME_DE, "</b>","<br/>",
+      "Verschuldungssituation: ", "<b>", map$variableplot, "</b>") %>%
       lapply(htmltools::HTML)
     
     l <- leaflet(map) %>% 
       addTiles() %>%
+      # addProviderTiles(provider = "CartoDB.PositronNoLabels") %>%
       addPolygons(
         fillColor = ~pal(variableplot),
-        color = "white",
+        color = "black",
         dashArray = "1",
         weight = 0.1, 
         smoothFactor = 0.5,
-        opacity = 1.0,
+        opacity = 0.7,
         fillOpacity = 0.7,
-        label = labels
+        label = mytext,
+        labelOptions = labelOptions(
+          style = list("font-weight" = "normal", padding = "3px 8px"),
+          textsize = "13px",
+          direction = "auto"
+        )
       ) %>%
       setView( 0, 0, 2 ) %>%
       leaflet::addLegend(position = "bottomright",
