@@ -136,7 +136,7 @@ server <- function(input, output) {
     
     l <- leaflet(map) %>% 
       addTiles() %>%
-      # addProviderTiles(provider = "CartoDB.PositronNoLabels") %>%
+      addProviderTiles(provider = "CartoDB.PositronNoLabels") %>%
       addPolygons(
         fillColor = ~pal(variableplot),
         color = "black",
