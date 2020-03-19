@@ -6,8 +6,8 @@ system("unzip ../world_shape_file.zip")
 
 # Alternative unzip to save Files in Path accesible by "./" - AS
 # Download the shapefile.
-download.file("http://thematicmapping.org/downloads/TM_WORLD_BORDERS_SIMPL-0.3.zip" , destfile="./world_shape_file.zip")
-unzip("./world_shape_file.zip",exdir=".")
+# download.file("http://thematicmapping.org/downloads/TM_WORLD_BORDERS_SIMPL-0.3.zip" , destfile="./world_shape_file.zip")
+# unzip("./world_shape_file.zip",exdir=".")
 
 shape_path <- "./TM_WORLD_BORDERS_SIMPL-0.3.shp"
 encoding <- "UTF-8"
