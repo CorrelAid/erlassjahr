@@ -1,8 +1,8 @@
 # Download the shapefile. (note that I store it in a folder called DATA. You have to change that if needed.)
-download.file("http://thematicmapping.org/downloads/TM_WORLD_BORDERS_SIMPL-0.3.zip" , destfile="../world_shape_file.zip")
+#download.file("http://thematicmapping.org/downloads/TM_WORLD_BORDERS_SIMPL-0.3.zip" , destfile="../world_shape_file.zip")
 
 # Unzip this file. You can do it with R (as below), or clicking on the object you downloaded.
-system("unzip ../world_shape_file.zip")
+#system("unzip ../world_shape_file.zip")
 
 # Alternative unzip to save Files in Path accesible by "./" - AS
 # Download the shapefile.
