@@ -76,8 +76,14 @@ ui <- fluidPage(
                     choices = c("Ja", "Nein")
       )),
     mainPanel(
-      
-      leafletOutput(outputId = "map") #,
+        div(class="outer",
+            tags$style(type = "text/css", 
+                       ".outer {position: fixed; top: 0; 
+                       left: 0; right: 0; bottom: 0; overflow: 
+                       hidden; padding: 0}"),
+          
+
+      leafletOutput(outputId = "map", height = "100%", width = "100%"))
       #DTOutput(outputId = "table")
 
     )
@@ -111,6 +117,13 @@ server <- function(input, output) {
     }
     # add regional input when constructed columns with region input
   })
+  # choose_region <- reactive({
+  #   if (input$var_region == "Afrika") {
+  #     long <- 
+  #       lat <- 
+  #       zoom <- 12
+  #   } # add regional input when constructed columns with region input
+  # })
   
   output$map <- renderLeaflet({
     
@@ -170,7 +183,7 @@ server <- function(input, output) {
 
 # shinyApp
 shinyApp(ui = ui, server = server)
-runApp('./app.R')
+runApp('./erlassjahr_app.R')
 
 
 ################# USeful Codewaste:
