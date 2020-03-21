@@ -33,10 +33,10 @@ map <- readOGR(dsn=path.expand(shape_path), layer="ne_50m_admin_0_countries", en
 # Convert Data from data_cleaning.R into csv File
 write.csv(sr19_erlassjahr, "./sr19_erlassjahr.csv")
 data <- read.csv("./sr19_erlassjahr.csv")
-data <- plyr::rename(data, c("country" = "NAME_DE"))
+data <- plyr::rename(data, c("country" = "ISO_A3"))
 
 # Combine data:
-datamap <- sp::merge(map, data, by.x="NAME_DE", duplicateGeoms=TRUE)
+datamap <- sp::merge(map, data, by.x="ISO_A3", duplicateGeoms=TRUE)
 
 
 ##--------------------------------------------------##
@@ -130,7 +130,7 @@ server <- function(input, output) {
     # Add data to map, if option "Alle" is true select all data
     datafiltered <- filteredData()
  
-    ordercounties <- match(map@data$NAME_DE, datafiltered$NAME_DE)
+    ordercounties <- match(map@data$ISO_A3, datafiltered$ISO_A3)
     map@data <- datafiltered[ordercounties, ]
     
     map$variableplot <- map@data[, input$var_debtindikator]
