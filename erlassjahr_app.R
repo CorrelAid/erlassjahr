@@ -33,7 +33,7 @@ map <- readOGR(dsn=path.expand(shape_path), layer="ne_50m_admin_0_countries", en
 # Convert Data from data_cleaning.R into csv File
 write.csv(sr19_erlassjahr, "./sr19_erlassjahr.csv")
 data <- read.csv("./sr19_erlassjahr.csv")
-data <- plyr::rename(data, c("country" = "ISO_A3"))
+data <- plyr::rename(data, c("country_A3" = "ISO_A3"))
 
 # Combine data:
 datamap <- sp::merge(map, data, by.x="ISO_A3", duplicateGeoms=TRUE)
@@ -49,13 +49,17 @@ ui <- fluidPage(
    sidebarLayout( position = "left",
     sidebarPanel(
       p("Auswahl Variablen"),
-  
+     
       # dropdown input selection Debt Indicator
       selectInput(
         inputId = "var_debtindikator",
         label = "Schuldenindikator Wählen",
-        choices = c("public_debt_bip2", "public_debt_state_rev2", "foreign_debt_bip2", 
-                    "foreign_debt_exp2", "external_debt_service_exp2")
+        choices =  list(`Öffentliche Schulden / BIP` = "public_debt_bip2", 
+                        `Öffentliche Schulden / Staatseinnahmen` = "public_debt_state_rev2", 
+                        `Auslandsschuldenstand / BIP` = "foreign_debt_bip2", 
+                        `Auslandsschuldenstand / Exporteinnahmen` = "foreign_debt_exp2", 
+                        `Auslandsschuldendienst / Exporteinnahmen` = "external_debt_service_exp2",
+                        `Aggregierte Indikatoren` = "Alle")
       ), # ADD AGGREGATED OPTION AS COLUM IN DATAFRAME
       
       # drop down input selection income category
@@ -143,13 +147,13 @@ server <- function(input, output) {
     #   lapply(htmltools::HTML)
     
     mytext <- paste0(
-      "<b>", map@data$NAME_DE, "</b>","<br/>",
+      "<b>", map@data$country, "</b>","<br/>",
       "Verschuldungssituation: ", "<b>", map$variableplot, "</b>") %>%
       lapply(htmltools::HTML)
     
-    l <- leaflet(map) %>% 
-      addTiles() %>%
-      addProviderTiles(provider = "CartoDB.PositronNoLabels") %>%
+    l <- leaflet(map, options = leafletOptions(minZoom = 2, maxZoom = 10)) %>% 
+       addTiles( # urlTemplate = "//{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png"
+       ) %>% addProviderTiles(provider = "CartoDB.PositronNoLabels") %>%
       addPolygons(
         fillColor = ~pal(variableplot),
         color = "black",
