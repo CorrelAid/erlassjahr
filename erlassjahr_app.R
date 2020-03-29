@@ -44,11 +44,28 @@ datamap <- sp::merge(map, data, by.x="ISO_A3", duplicateGeoms=TRUE)
 ##--------------------------------------------------##
 
 ui <- fluidPage(
-  titlePanel(title = h1("Erlassjahr app", style = "color:#3474A7", align = "center")),
+  #titlePanel(title = h1("Erlassjahr app", style = "color:#3474A7", align = "left")),
+  
   #layout with main area and side bar
-   sidebarLayout( position = "left",
-    sidebarPanel(
-      p("Auswahl Variablen"),
+   sidebarLayout(
+                  mainPanel(
+                    div(class="outer",
+                        tags$style(type = "text/css", 
+                                   ".outer {position: fixed; top: 0; 
+                                   left: 0; right: 0; bottom: 0; padding: 0}"), # overflow:   hidden;
+                        
+                        
+                        
+                        leafletOutput(outputId = "map", height = "100%", width = "100%"))
+                    
+                    #DTOutput(outputId = "table")
+                    
+                    ),
+                  
+    # Create movable fixed (absolute) side panel
+         absolutePanel(
+                      top = 100, left = 10, width = 250, fixed=TRUE,
+                       draggable = TRUE, height = "auto",
      
       # dropdown input selection Debt Indicator
       selectInput(
@@ -66,30 +83,28 @@ ui <- fluidPage(
       selectInput(
         inputId = "var_income",
         label = "Einkommenskategorie wählen",
-        choices = c("Alle","L", "LM", "UM", "NA")
+        choices =  list(`Alle` = "Alle",
+                        `Untere Einkommenstkategorie` = "L",
+                        `Untere Mittlere Kategorie` = "LM", 
+                        `Obere Mittlere Kategorie` = "UM")
       ),
         # drop down input selection Region
         selectInput("var_region", 
                     "Region wählen", 
-                    choices = c("Afrika", "Europa", "Amerika", "Australien", "Asien")
-    ), # ADD REGION VARIABLE IN DATAFRAME
+                    choices = list(`Alle` = "Alle",
+                                 `Asien` = "Asia", 
+                                 `Europa` = "Europe", 
+                                 `Latein Amerika` = "Latin America", 
+                                 `Mittlerer Osten` = "Middle East", 
+                                 `Ozeanien` = "Oceania",
+                                 `Afrika` = "Sub-Saharan Africa")
+    ), 
     
-        # drop down input selection Trend anzeigen
-        selectInput("var_trend", 
-                    "Trend anzeigen", 
-                    choices = c("Ja", "Nein")
-      )),
-    mainPanel(
-        div(class="outer",
-            tags$style(type = "text/css", 
-                       ".outer {position: fixed; top: 0; 
-                       left: 0; right: 0; bottom: 0; overflow: 
-                       hidden; padding: 0}"),
-          
-
-      leafletOutput(outputId = "map", height = "100%", width = "100%"))
-      #DTOutput(outputId = "table")
-
+        # Drop down input selection Trend anzeigen
+    checkboxInput("var_trend", 
+                    "Verschuldungstrend anzeigen", 
+                  value = FALSE
+      )
     )
   )
 )
@@ -113,22 +128,22 @@ hint.grnd <- " #B3F0D4"
 server <- function(input, output) {
   #output$table <- renderDT(data)
   
+  # Select Data according to input
   filteredData <- reactive({
     if (input$var_income == "Alle") {
-      subset(data, income == income) 
+     data <- subset(data, income == income) 
     } else {
-    subset(data, income == input$var_income)
+    data <- subset(data, income == input$var_income)
+    }
+    if (input$var_region == "Alle") {
+      data <- subset(data, region_large == region_large) 
+    } else {
+      data <- subset(data, region_large == input$var_region)
     }
     # add regional input when constructed columns with region input
   })
-  # choose_region <- reactive({
-  #   if (input$var_region == "Afrika") {
-  #     long <- 
-  #       lat <- 
-  #       zoom <- 12
-  #   } # add regional input when constructed columns with region input
-  # })
   
+  # create reactive data output
   output$map <- renderLeaflet({
     
     # Add data to map, if option "Alle" is true select all data
@@ -143,14 +158,13 @@ server <- function(input, output) {
     pal <- colorFactor(c(n.kritisch, l.kritisch, kritisch, s.kritisch
                          ), levels = c(0, 1, 2, 3), na.color = "#808080" )
     
-    # labels <- sprintf("%s: %g", map$NAME_DE, map$variableplot) %>%
-    #   lapply(htmltools::HTML)
-    
+    # Create text shown when mouse glides over countries
     mytext <- paste0(
       "<b>", map@data$country, "</b>","<br/>",
       "Verschuldungssituation: ", "<b>", map$variableplot, "</b>") %>%
       lapply(htmltools::HTML)
     
+    # Create Map
     l <- leaflet(map, options = leafletOptions(minZoom = 2, maxZoom = 10)) %>% 
        addTiles( # urlTemplate = "//{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png"
        ) %>% addProviderTiles(provider = "CartoDB.PositronNoLabels") %>%
@@ -169,6 +183,7 @@ server <- function(input, output) {
           direction = "auto"
         )
       ) %>%
+      # Set initial Zoom of Map
       setView( 0, 0, 2 ) %>%
       leaflet::addLegend(position = "bottomright",
         # Specify colors manually b/c pal function does not show colors in legend
