@@ -116,7 +116,7 @@ sr19_erlassjahr$foreign_debt_exp2 <- filter_recode(sr19_erlassjahr$foreign_debt_
 sr19_erlassjahr$external_debt_service_exp2 <- filter_recode(sr19_erlassjahr$external_debt_service_exp, external_debt_service_exp_filter)
 
 # Verschuldungssituation variable
-sr19_erlassjahr$debt_sit_total <- rowSums(sr19_erlassjahr[, c(20:24)], na.rm = TRUE)
+sr19_erlassjahr$debt_sit_total <- rowSums(sr19_erlassjahr[, c(21:25)], na.rm = TRUE)
 sr19_erlassjahr$debt_sit_cat <-
   ifelse(
     sr19_erlassjahr$debt_sit_total == 0,
@@ -165,4 +165,4 @@ sr19_erlassjahr$trend_fdp <- trend_recode(sr19_erlassjahr$trend_fdp)
 sr19_erlassjahr$trend_fde <- trend_recode(sr19_erlassjahr$trend_fde)
 sr19_erlassjahr$trend_edse <- trend_recode(sr19_erlassjahr$trend_edse)
 
-
+save(sr19_erlassjahr, file = "sr19_erlassjahr.RData")

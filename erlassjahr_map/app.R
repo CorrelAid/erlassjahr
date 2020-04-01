@@ -19,7 +19,6 @@ library(shiny)
 library(DT)
 library(rgdal)
 library(leaflet)
-library(readr)
 
 ##--------------------------------------------------##
 ## Load Data                                        ##
@@ -32,10 +31,13 @@ encoding <- "UTF-8"
 map <- readOGR(dsn=path.expand(shape_path), layer="ne_50m_admin_0_countries", encoding = encoding)
 
 # Convert Data from data_cleaning.R into csv File
-#write.csv(sr19_erlassjahr, "./sr19_erlassjahr.csv")
-# data <- readr::read_csv("sr19_erlassjahr.csv")
+# write.csv(sr19_erlassjahr, "./sr19_erlassjahr.csv")
+# data <- read.csv("./sr19_erlassjahr.csv")
 load("sr19_erlassjahr.RData")
-data <- plyr::rename(data, c("country_A3" = "ISO_A3"))
+data <- plyr::rename(sr19_erlassjahr, c("country_A3" = "ISO_A3"))
+data <- as.data.frame(data) # data is loaded as tibble but needs to be converted to data.frame for merging
+data$debt_sit_cat <- as.numeric(data$debt_sit_cat)
+data$debt_sit_cat <- data$debt_sit_cat -1
 
 # Combine data:
 datamap <- sp::merge(map, data, by.x="ISO_A3", duplicateGeoms=TRUE)
@@ -73,12 +75,13 @@ ui <- fluidPage(
       selectInput(
         inputId = "var_debtindikator",
         label = "Schuldenindikator Wählen",
-        choices =  list(`Öffentliche Schulden / BIP` = "public_debt_bip2", 
+        choices =  list(`Aggregierte Indikatoren` = "debt_sit_cat",
+                        `Öffentliche Schulden / BIP` = "public_debt_bip2", 
                         `Öffentliche Schulden / Staatseinnahmen` = "public_debt_state_rev2", 
                         `Auslandsschuldenstand / BIP` = "foreign_debt_bip2", 
                         `Auslandsschuldenstand / Exporteinnahmen` = "foreign_debt_exp2", 
-                        `Auslandsschuldendienst / Exporteinnahmen` = "external_debt_service_exp2",
-                        `Aggregierte Indikatoren` = "Alle")
+                        `Auslandsschuldendienst / Exporteinnahmen` = "external_debt_service_exp2"
+                        )
       ), # ADD AGGREGATED OPTION AS COLUM IN DATAFRAME
       
       # drop down input selection income category
@@ -204,7 +207,7 @@ server <- function(input, output) {
 
 # shinyApp
 shinyApp(ui = ui, server = server)
-runApp('./erlassjahr_app.R')
+#runApp('./erlassjahr_app.R')
 
 
 ################# USeful Codewaste:
