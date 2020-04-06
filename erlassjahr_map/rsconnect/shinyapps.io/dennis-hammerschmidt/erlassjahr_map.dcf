@@ -5,6 +5,6 @@ account: dennis-hammerschmidt
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 2035245
-bundleId: 2954226
+bundleId: 2954378
 url: https://dennis-hammerschmidt.shinyapps.io/erlassjahr_map/
-when: 1585752225.34095
+when: 1585754379.23122

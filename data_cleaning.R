@@ -14,68 +14,132 @@ library(readxl)
 library(countrycode)
 library(tidyverse)
 library(magrittr)
+library(zoo)
 
 # Load data
 
 # IMPORTANT: Trend variable will be read as POSCIX variable due to its pre-defined format in the orginial data source
 #            I manually changed this in the excel file to work with the data in R.
 
-sr19_erlassjahr <- read_xlsx("SR19 Überblickstabelle.xlsx")
-sr19_erlassjahr <- sr19_erlassjahr[2:127,1:17] # keep only relevant variables and rows that contain data points
+#sr19_erlassjahr <- read_xlsx("SR19 Überblickstabelle.xlsx")
+sr20_erlassjahr <- read_xlsx("SR20 Überblickstabelle-191107.xlsx")
+sr20_erlassjahr <- sr20_erlassjahr[1:129,1:22] # keep only relevant variables and rows that contain data points
 
 ##----------------------##
 ##  Basic Data Cleaning ##
 ##----------------------##
-
 # Rename variables 
-names(sr19_erlassjahr)[8] <- "foreign_debt_exp"
-names(sr19_erlassjahr)[10] <- "external_debt_service_exp"
+names(sr20_erlassjahr)[11] <- "foreign_debt_exp"
+sr20_erlassjahr$foreign_debt_exp <- as.numeric(sr20_erlassjahr$foreign_debt_exp)
+names(sr20_erlassjahr)[14] <- "external_debt_service_exp"
 
-sr19_erlassjahr %<>% 
+sr20_erlassjahr %<>% 
   filter(!is.na(Land)) %>% 
   rename(country = `Land`,
          public_debt_bip = `Öffentliche Schulden / BIP`,
+         public_debt_bip2 = `Wert`, #rename to make inline with app.R coding
          trend_pdb = `Trend1`,
          public_debt_state_rev = `Öffentliche Schulden / Staatseinnahmen`,
+         public_debt_state_rev2 = `Wert2`, #rename to make inline with app.R coding
          trend_pdsr = `Trend12`,
          foreign_debt_bip = `Auslandsschuldenstand / BIP`,
-         trend_fdp = `Trend13`,
-         trend_fde = `Trend14`,
-         trend_edse = `Trend15`,
-         risk_excessive_debt = `Risiko der Überschuldung laut IWF am 1.11.2018`,
-         exceedance = `Überschreitungen`,
+         foreign_debt_bip2 = `Wert3`, #rename to make inline with app.R coding
+         trend_fdp = `Trend3`,
+         foreign_debt_exp2 = `Wert4`, #rename to make inline with app.R coding
+         trend_fde = `Trend4`,
+         external_debt_service_exp2 = `Wert5`, #rename to make inline with app.R coding
+         trend_edse = `Trend5`,
+         risk_excessive_debt = `Risiko der Überschuldung laut IWF am 31.7.2019`,
+         exceedance = `Überschreibtungen`,
          debt_situation = `Verschuldungs-situation`,
          tendency = `Tendenz`,
          income = `Income`,
          trend = `Trend`)
 
 # Turn character into numeric
-sr19_erlassjahr$foreign_debt_bip <- as.numeric(sr19_erlassjahr$foreign_debt_bip)
-sr19_erlassjahr$foreign_debt_exp <- as.numeric(sr19_erlassjahr$foreign_debt_exp)
-sr19_erlassjahr$external_debt_service_exp <- as.numeric(sr19_erlassjahr$external_debt_service_exp)
+sr20_erlassjahr$debt_situation <- as.numeric(sr20_erlassjahr$debt_situation)
+sr20_erlassjahr$trend <- as.numeric(sr20_erlassjahr$trend)
 
+sr20_erlassjahr$country <- gsub("\\*", "", sr20_erlassjahr$country)
 # Convert German country names to ISO3c codes
 custom_match <- c("Moldawien" = "MDA")
-sr19_erlassjahr$country_A3 <- countrycode::countrycode(sr19_erlassjahr$country, 
+sr20_erlassjahr$country_A3 <- countrycode::countrycode(sr20_erlassjahr$country, 
                                                  "country.name.de", "iso3c", custom_match = custom_match)
 
-# Add regions to the dataframe
-sr19_erlassjahr$region <- countrycode::countrycode(sr19_erlassjahr$country_A3, "iso3c", "region")
-
-sr19_erlassjahr$region_large <- ifelse(sr19_erlassjahr$region %in% c("Eastern Africa", "Western Africa", "Middle Africa", "Southern Africa"), "Sub-Saharan Africa", NA)
-sr19_erlassjahr$region_large <- ifelse(sr19_erlassjahr$region %in% c("Australia and New Zealand", "Micronesia", "Melanesia", "Polynesia"), "Oceania", sr19_erlassjahr$region_large)
-sr19_erlassjahr$region_large <- ifelse(sr19_erlassjahr$region %in% c("Central Asia", "Eastern Asia", "South-Eastern Asia", "Southern Asia"), "Asia", sr19_erlassjahr$region_large)
-sr19_erlassjahr$region_large <- ifelse(sr19_erlassjahr$region %in% c("Eastern Europe", "Northern Europe", "Southern Europe", "Western Europe") | sr19_erlassjahr$country_A3 %in% c("CAN","CYP"), "Europe", sr19_erlassjahr$region_large)
-sr19_erlassjahr$region_large <- ifelse(sr19_erlassjahr$region %in% c("Caribbean", "Central America", "South America"), "Latin America", sr19_erlassjahr$region_large)
-sr19_erlassjahr$region_large <- ifelse(sr19_erlassjahr$region %in% c("Western Asia", "Northern Africa") | sr19_erlassjahr$country_A3 %in% c("AFG","IRN"), "Middle East" , sr19_erlassjahr$region_large)
-sr19_erlassjahr$region_large <- ifelse(sr19_erlassjahr$region == "Northern America", "North America", sr19_erlassjahr$region_large)
+sr20_erlassjahr$region <- NA
+sr20_erlassjahr$region <- ifelse(is.na(sr20_erlassjahr$country_A3), sr20_erlassjahr$country, NA)
+sr20_erlassjahr$region <- zoo::na.locf(sr20_erlassjahr$region)
 
 # remove ambiguous states
-sr19_erlassjahr <- sr19_erlassjahr[!is.na(sr19_erlassjahr$country_A3), ]
+sr20_erlassjahr <- sr20_erlassjahr[!is.na(sr20_erlassjahr$country_A3), ]
 
 ##--------------------##
 ##  Rescale Variables ##
 ##--------------------##
+
+############
+## Trend ##
+###########
+
+# Define a function to rescale the + and - signs in the trend variables to numeric outputs
+trend_recode <- function(var){
+  var <- ifelse(
+    var == "o",
+    0,
+    ifelse(
+      var == "+",
+      1,
+      ifelse(
+        var == "-",
+        -1,
+        var
+      )
+    )
+  )
+  var <- as.numeric(var)
+}
+
+# Apply function to all 5 trend variables
+sr20_erlassjahr$trend_pdb <- trend_recode(sr20_erlassjahr$trend_pdb)
+sr20_erlassjahr$trend_pdsr <- trend_recode(sr20_erlassjahr$trend_pdsr)
+sr20_erlassjahr$trend_fdp <- trend_recode(sr20_erlassjahr$trend_fdp)
+sr20_erlassjahr$trend_fde <- trend_recode(sr20_erlassjahr$trend_fde)
+sr20_erlassjahr$trend_edse <- trend_recode(sr20_erlassjahr$trend_edse)
+
+
+##############
+## Debt Sit ##
+##############
+
+sr20_erlassjahr$debt_sit_cat <-
+  ifelse(
+    sr20_erlassjahr$exceedance == 0,
+    0,
+    ifelse(
+      sr20_erlassjahr$exceedance > 0 &
+        sr20_erlassjahr$exceedance < 5,
+      1,
+      ifelse(
+        sr20_erlassjahr$exceedance >= 5 &
+          sr20_erlassjahr$exceedance < 10,
+        2,
+        ifelse(sr20_erlassjahr$exceedance >= 10, 3, NA)
+      )
+    )
+  )
+
+sr20_erlassjahr$debt_sit_cat <- factor(sr20_erlassjahr$debt_sit_cat)
+levels(sr20_erlassjahr$debt_sit_cat) <- c("nicht kritisch", "leicht kritisch", "kritisch", "sehr kritisch")
+
+save(sr20_erlassjahr, file = "sr20_erlassjahr.RData")
+
+
+
+##---------------------------------##
+## Needed only for sr19_erlassjahr ##
+##---------------------------------##
+
+
 
 ####################
 ## Debt Situation ##
@@ -109,60 +173,8 @@ foreign_debt_exp_filter <- c(150, 225, 300)
 external_debt_service_exp_filter <- c(15, 22.5, 30)
 
 # Apply filter categories and recode function to each of the five category variables
-sr19_erlassjahr$public_debt_bip2 <- filter_recode(sr19_erlassjahr$public_debt_bip, public_debt_bip_filter)
-sr19_erlassjahr$public_debt_state_rev2 <- filter_recode(sr19_erlassjahr$public_debt_state_rev, public_debt_state_rev_filter)
-sr19_erlassjahr$foreign_debt_bip2 <- filter_recode(sr19_erlassjahr$foreign_debt_bip, foreign_debt_bip_filter)
-sr19_erlassjahr$foreign_debt_exp2 <- filter_recode(sr19_erlassjahr$foreign_debt_exp, foreign_debt_exp_filter)
-sr19_erlassjahr$external_debt_service_exp2 <- filter_recode(sr19_erlassjahr$external_debt_service_exp, external_debt_service_exp_filter)
-
-# Verschuldungssituation variable
-sr19_erlassjahr$debt_sit_total <- rowSums(sr19_erlassjahr[, c(21:25)], na.rm = TRUE)
-sr19_erlassjahr$debt_sit_cat <-
-  ifelse(
-    sr19_erlassjahr$debt_sit_total == 0,
-    0,
-    ifelse(
-      sr19_erlassjahr$debt_sit_total > 0 &
-        sr19_erlassjahr$debt_sit_total < 5,
-      1,
-      ifelse(
-        sr19_erlassjahr$debt_sit_total >= 5 &
-          sr19_erlassjahr$debt_sit_total < 10,
-        2,
-        ifelse(sr19_erlassjahr$debt_sit_total >= 10, 3, NA)
-      )
-    )
-  )
-
-sr19_erlassjahr$debt_sit_cat <- factor(sr19_erlassjahr$debt_sit_cat)
-levels(sr19_erlassjahr$debt_sit_cat) <- c("nicht kritisch", "leicht kritisch", "kritisch", "sehr kritisch")
-############
-## Trend ##
-###########
-
-# Define a function to rescale the + and - signs in the trend variables to numeric outputs
-trend_recode <- function(var){
-  var <- ifelse(
-    is.na(var),
-    0,
-    ifelse(
-      var == "+",
-      1,
-      ifelse(
-        var == "-",
-        -1,
-        var
-      )
-    )
-  )
-  var <- as.numeric(var)
-}
-
-# Apply function to all 5 trend variables
-sr19_erlassjahr$trend_pdb <- trend_recode(sr19_erlassjahr$trend_pdb)
-sr19_erlassjahr$trend_pdsr <- trend_recode(sr19_erlassjahr$trend_pdsr)
-sr19_erlassjahr$trend_fdp <- trend_recode(sr19_erlassjahr$trend_fdp)
-sr19_erlassjahr$trend_fde <- trend_recode(sr19_erlassjahr$trend_fde)
-sr19_erlassjahr$trend_edse <- trend_recode(sr19_erlassjahr$trend_edse)
-
-save(sr19_erlassjahr, file = "sr19_erlassjahr.RData")
+sr20_erlassjahr$public_debt_bip2 <- filter_recode(sr20_erlassjahr$public_debt_bip, public_debt_bip_filter)
+sr20_erlassjahr$public_debt_state_rev2 <- filter_recode(sr20_erlassjahr$public_debt_state_rev, public_debt_state_rev_filter)
+sr20_erlassjahr$foreign_debt_bip2 <- filter_recode(sr20_erlassjahr$foreign_debt_bip, foreign_debt_bip_filter)
+sr20_erlassjahr$foreign_debt_exp2 <- filter_recode(sr20_erlassjahr$foreign_debt_exp, foreign_debt_exp_filter)
+sr20_erlassjahr$external_debt_service_exp2 <- filter_recode(sr20_erlassjahr$external_debt_service_exp, external_debt_service_exp_filter)
