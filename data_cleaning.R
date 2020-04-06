@@ -21,8 +21,9 @@ library(zoo)
 # IMPORTANT: Trend variable will be read as POSCIX variable due to its pre-defined format in the orginial data source
 #            I manually changed this in the excel file to work with the data in R.
 
-#sr19_erlassjahr <- read_xlsx("SR19 Überblickstabelle.xlsx")
 sr20_erlassjahr <- read_xlsx("SR20 Überblickstabelle-191107.xlsx")
+# add Grundgesamtheit
+country_all <- read_xlsx("SR20 Überblickstabelle-191107.xlsx", sheet =  7)
 sr20_erlassjahr <- sr20_erlassjahr[1:129,1:22] # keep only relevant variables and rows that contain data points
 
 ##----------------------##
@@ -72,6 +73,19 @@ sr20_erlassjahr$region <- zoo::na.locf(sr20_erlassjahr$region)
 
 # remove ambiguous states
 sr20_erlassjahr <- sr20_erlassjahr[!is.na(sr20_erlassjahr$country_A3), ]
+
+# add all country names
+names(country_all)[1] <- "country_A3"
+
+custom_match2 <- c("Eswatini" = "SWZ", "Kosovo" = "RKS", "Micronesia" = "FSM", "S†o Tom_ and PrÍncipe" = "STP")
+country_all$country_A3 <- countrycode::countrycode(country_all$country_A3, 
+                                                       "country.name", "iso3c", custom_match = custom_match2)
+country_all <- country_all[,1]
+
+sr20_erlassjahr <- merge(sr20_erlassjahr, country_all, by = "country_A3", all.y = TRUE)
+# create a variable that is 1 if the country is part of the sample and 0 otherwise
+
+sr20_erlassjahr$sample <- ifelse(is.na(sr20_erlassjahr$country), 0, 1)
 
 ##--------------------##
 ##  Rescale Variables ##
