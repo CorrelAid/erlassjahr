@@ -15,71 +15,143 @@
 ## Prerequisits                                     ##
 ##--------------------------------------------------##
 
+install.packages("reactlog")
+library(reactlog)
+options(shiny.reactlog=TRUE) # package to track dependencies of shiny app
+
 library(shiny)
 library(DT)
 library(rgdal)
 library(leaflet)
+library(maps) # For Capital city coordinates
+library(dplyr) # For Data Manipulation
+library(english) # Transform numbers to words
+library(plyr) # to use the revalue function (can be edited to rely on dplyr) -> TO DO: AS
+library(tidyverse)
+library("tidylog", warn.conflicts = FALSE) # feedback on join functions
 
 ##--------------------------------------------------##
 ## Load Data                                        ##
 ##--------------------------------------------------##
 
 # Map Data / Shape File
-shape_path <- "./ne_50m_admin_0_countries.shp"
+shape_path <- "TM_WORLD_BORDERS_SIMPL-0.3.shp"
 encoding <- "UTF-8"
 
-map <- readOGR(dsn=path.expand(shape_path), layer="ne_50m_admin_0_countries", encoding = encoding)
+map <- readOGR(dsn=path.expand(shape_path), layer="TM_WORLD_BORDERS_SIMPL-0.3", encoding = encoding)
 
-# Convert Data from data_cleaning.R into csv File
-write.csv(sr19_erlassjahr, "./sr19_erlassjahr.csv")
-data <- read.csv("./sr19_erlassjahr.csv")
-data <- plyr::rename(data, c("country" = "NAME_DE"))
+# Load Data
+load("sr20_erlassjahr.RData")
+
+# Modify Data (evt in data_cleaning?)
+data <- plyr::rename(sr20_erlassjahr, c("country_A3" = "ISO3"))
+data <- as.data.frame(data) # data is loaded as tibble but needs to be converted to data.frame for merging
+data$debt_sit_cat2 <- as.numeric(data$debt_sit_cat)
+data$debt_sit_cat2 <- data$debt_sit_cat2 -1
+
+# write a function for this?
+data$trend_new <- revalue(as.character(as.english(data$trend)), c("minus one"="minus_one"))
+data$trend_pdb <- revalue(as.character(as.english(data$trend_pdb)), c("minus one"="minus_one"))
+data$trend_pdsr <- revalue(as.character(as.english(data$trend_pdsr)), c("minus one"="minus_one")) 
+data$trend_fdp <- revalue(as.character(as.english(data$trend_fdp)), c("minus one"="minus_one"))
+data$trend_fde <- revalue(as.character(as.english(data$trend_fde)), c("minus one"="minus_one")) 
+data$trend_edse <- revalue(as.character(as.english(data$trend_edse)), c("minus one"="minus_one")) 
+data[data==""]<-NA
+
+data$payment_stop <- NA
+data$payment_stop[data$ISO3 == "ZWE"] <- "feuer_rot"
+data$payment_stop[data$ISO3 == "MOZ"] <- "feuer_orange"
+data$payment_stop[data$ISO3 == "IRQ"] <- "feuer_grau"
 
 # Combine data:
-datamap <- sp::merge(map, data, by.x="NAME_DE", duplicateGeoms=TRUE)
+map <- sp::merge(map, data, by.x="ISO3", duplicateGeoms=TRUE)
+#map@data <- inner_join(data[ordercounties,], map@data, by = "ISO3")
 
 
 ##--------------------------------------------------##
 ## User Interface Shiny                             ##
 ##--------------------------------------------------##
 
+# Install log file for debugging:
+options(shiny.reactlog=TRUE)
+
 ui <- fluidPage(
-  titlePanel(title = h1("Erlassjahr app", style = "color:#3474A7", align = "center")),
-  #layout with main area and side bar
-   sidebarLayout( position = "left",
-    sidebarPanel(
-      p("Auswahl Variablen"),
+  #titlePanel(title = h1("Erlassjahr app", style = "color:#3474A7", align = "left")),
   
+  #layout with main area and side bar
+  sidebarLayout(
+    mainPanel(
+      div(class="outer",
+          tags$style(type = "text/css", 
+                     ".outer {position: fixed; top: 0; 
+                     left: 0; right: 0; bottom: 0; padding: 0}"), # overflow:   hidden;
+          
+          
+          
+          leafletOutput(outputId = "map1", height = "100%", width = "100%"))
+      
+      ),
+    
+    # Create movable fixed (absolute) side panel
+    absolutePanel(
+      top = 100, left = 10, width = 250, fixed=TRUE,
+      draggable = TRUE, height = "auto",
+      
       # dropdown input selection Debt Indicator
       selectInput(
         inputId = "var_debtindikator",
         label = "Schuldenindikator Wählen",
-        choices = c("public_debt_bip2", "public_debt_state_rev2", "foreign_debt_bip2", 
-                    "foreign_debt_exp2", "external_debt_service_exp2")
-      ), # ADD AGGREGATED OPTION AS COLUM IN DATAFRAME
+        choices =  list(`Aggregierte Indikatoren` = "debt_sit_cat2",
+                        `Öffentliche Schulden / BIP` = "public_debt_bip2", 
+                        `Öffentliche Schulden / Staatseinnahmen` = "public_debt_state_rev2", 
+                        `Auslandsschuldenstand / BIP` = "foreign_debt_bip2", 
+                        `Auslandsschuldenstand / Exporteinnahmen` = "foreign_debt_exp2", 
+                        `Auslandsschuldendienst / Exporteinnahmen` = "external_debt_service_exp2"
+        )
+      ), 
       
       # drop down input selection income category
-      selectInput(
-        inputId = "var_income",
-        label = "Einkommenskategorie wählen",
-        choices = c("Alle","L", "LM", "UM", "NA")
+      selectInput("var_income",
+                  "Einkommenskategorie wählen",
+                  choices =  list(`Alle` = "Alle",
+                                  `geringes Einkommen` = "l",
+                                  `mittleres Einkommen, unterer Teil` = "lm", 
+                                  `mittleres Einkommen, oberer Teil` = "um",
+                                  `hohes Einkommen` = "h")
       ),
-        # drop down input selection Region
-        selectInput("var_region", 
-                    "Region wählen", 
-                    choices = c("Afrika", "Europa", "Amerika", "Australien", "Asien")
-    ), # ADD REGION VARIABLE IN DATAFRAME
-    
-        # drop down input selection Trend anzeigen
-        selectInput("var_trend", 
-                    "Trend anzeigen", 
-                    choices = c("Ja", "Nein")
-      )),
-    mainPanel(
+      # drop down input selection Region
+      selectInput("var_region", 
+                  "Region wählen", 
+                  choices = list(`Alle` = "Alle",
+                                 `Südasien, Südostasien, Pazifik` = "Südasien, Südostasien, Pazifik", 
+                                 `Europa, GUS` = "Europa, GUS", 
+                                 `Lateinamerika, Karibik` = "Lateinamerika, Karibik", 
+                                 `Nordafrika, Naher Osten` = "Nordafrika, Naher Osten", 
+                                 `Subsahara-Afrika` = "Subsahara-Afrika")
+      ), 
       
-      leafletOutput(outputId = "map") #,
-      #DTOutput(outputId = "table")
-
+      # drop down input selection Risikofaktoren
+      selectInput("var_risiko", 
+                  "Risikofaktoren wählen", 
+                  choices = list(`Alle` = "Alle",
+                                 `Extraktivismus` = "Asia", 
+                                 `politische und soziale Fragilität` = "Europe", 
+                                 `Schuldenstruktur` = "Latin America", 
+                                 `Naturkathastrophen / Klimawandel` = "Middle East" 
+                  )
+      ),
+      
+      # Drop down input selection Trend anzeigen
+      checkboxInput("var_trend", 
+                    "Verschuldungstrend anzeigen", 
+                    value = FALSE
+      ),
+      
+      # Drop down input selection Zahlungseinstellungen anzeigen
+      checkboxInput("var_zahlung", 
+                    "Anhaltende und zwischenzeitliche Zahlungseinstellungen anzeigen", 
+                    value = FALSE
+      )
     )
   )
 )
@@ -103,58 +175,141 @@ hint.grnd <- " #B3F0D4"
 server <- function(input, output) {
   #output$table <- renderDT(data)
   
+  # Select Data according to input
   filteredData <- reactive({
     if (input$var_income == "Alle") {
-      subset(data, income == income) 
+      data <- subset(map@data, income == income) 
     } else {
-    subset(data, income == input$var_income)
+      data <- subset(map@data, income == input$var_income)
+    }
+    if (input$var_region == "Alle") {
+      data <- subset(map@data, region == region) 
+    } else {
+      data <- subset(map@data, region == input$var_region)
     }
     # add regional input when constructed columns with region input
   })
   
-  output$map <- renderLeaflet({
+  filteredTrend <- reactive({
+    if (input$var_debtindikator == "debt_sit_cat2") {
+      trend_var <- "trend_new"
+    } else if (input$var_debtindikator == "public_debt_bip2") {
+      trend_var <- "trend_pdb"
+    } else if (input$var_debtindikator == "public_debt_state_rev2") {
+      trend_var <- "trend_pdsr"
+    } else if (input$var_debtindikator == "foreign_debt_bip2") {
+      trend_var <- "trend_fdp"
+    } else if (input$var_debtindikator == "foreign_debt_exp2") {
+      trend_var <- "trend_fde"
+    } else  {
+      trend_var <- "trend_edse"
+    }
+  })
+  
+  # Select input for mouseover:
+  # mouseover <- reactive({
+  #   if (input$var_debtindikator != "debt_sit_cat") {
+  #     text_var <- gsub('.$', '',input$var_debtindikator)
+  #   } else {
+  #     text_var <- input$var_debtindikator
+  #   } 
+  # })
+  # create reactive data output
+  output$map1 <- renderLeaflet({
     
-    # Add data to map, if option "Alle" is true select all data
+    # Create Basemap:
+    leaflet(map, options = leafletOptions(minZoom = 2, maxZoom = 10)) %>%  # 
+      addTiles( # urlTemplate = "//{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png"
+      ) %>% addProviderTiles(provider = "CartoDB.PositronNoLabels") %>%
+      setView( 0, 0, 2 )
+  })
+  
+  # Display colored countries dependent on the output
+  observe({
+    
+    # Choose data based on selected input
     datafiltered <- filteredData()
- 
-    ordercounties <- match(map@data$NAME_DE, datafiltered$NAME_DE)
+    
+    # match selected rows in data with spacial data
+    ordercounties <- match(map@data$ISO3, datafiltered$ISO3)
     map@data <- datafiltered[ordercounties, ]
     
+    # Select indicators for polygons
     map$variableplot <- map@data[, input$var_debtindikator]
     
-    # Create leaflet
+    #Select input for mouseover text
+    # var_mouseover <- mouseover()
+    # map$mouseover <- map@data[, var_mouseover]
+    map$mouseover <- map@data[,gsub('.$', '',input$var_debtindikator)]
+    
+    trendfilter <- filteredTrend()
+    
+    #trendinput <- print(paste0("map@data$", trendfilter), quote = FALSE)
+    trend_data <- map@data[!is.na(trendfilter),]
+    trend_data$trendinput <- trend_data[, which(colnames(trend_data)==trendfilter)]
+    
+    # data für feuersymbole
+    pay_data <- map@data[!is.na(map@data$payment_stop),]
+    # Create color palette
     pal <- colorFactor(c(n.kritisch, l.kritisch, kritisch, s.kritisch
-                         ), levels = c(0, 1, 2, 3), na.color = "#808080" )
+    ), levels = c(0, 1, 2, 3), na.color = "#808080" )
     
-    labels <- sprintf("%s: %g", map$NAME_DE, map$variableplot) %>%
+    # Create text shown when mouse glides over countries
+    mytext <- paste0(
+      "<b>", map@data$country, "</b>","<br/>",
+      "Verschuldungssituation: ", "<b>", map$mouseover, "</b>" , "%") %>%
       lapply(htmltools::HTML)
-    
-    l <- leaflet(map) %>% 
-      addTiles() %>%
+    # Transform shapefile for poligon input
+    map_ll <- spTransform(map, CRS("+init=epsg:4326"))
+    # Create Map
+    l <- leafletProxy("map1", data = map_ll) %>%
+      clearShapes() %>% #clearMarkers() %>%
       addPolygons(
         fillColor = ~pal(variableplot),
-        color = "white",
+        color = "black",
         dashArray = "1",
         weight = 0.1, 
         smoothFactor = 0.5,
-        opacity = 1.0,
+        opacity = 0.7,
         fillOpacity = 0.7,
-        label = labels
+        label = mytext,
+        labelOptions = labelOptions(
+          style = list("font-weight" = "normal", padding = "3px 8px"),
+          textsize = "13px",
+          direction = "auto"
+        )
       ) %>%
-      setView( 0, 0, 2 ) %>%
+      clearControls() %>%
+      # Make legend
       leaflet::addLegend(position = "bottomright",
-        # Specify colors manually b/c pal function does not show colors in legend
-        colors = c(s.kritisch, kritisch,  l.kritisch, n.kritisch ), 
-        values = c("sehr kritisch", "kritisch", "leicht kritisch",
-                              "nicht kritisch", "keine Daten vorhanden"),
-        na.label = "keine Daten vorhanden",
-        opacity = 0.7, title = "Verschuldungssituation",
-         labels = c("sehr kritisch", "kritisch", "leicht kritisch",
-                    "nicht kritisch")
+                         # Specify colors manually b/c pal function does not show colors in legend
+                         colors = c(s.kritisch, kritisch,  l.kritisch, n.kritisch ), 
+                         values = c("sehr kritisch", "kritisch", "leicht kritisch",
+                                    "nicht kritisch", "keine Daten vorhanden"),
+                         na.label = "keine Daten vorhanden",
+                         opacity = 0.7, title = "Verschuldungssituation",
+                         labels = c("sehr kritisch", "kritisch", "leicht kritisch",
+                                    "nicht kritisch") 
       )
+    proxy <- leafletProxy(mapId = "map1", data = trend_data) %>%
+      clearMarkers()
+    
+    # marker für Trend
+    if (input$var_trend) {
+      proxy %>% addMarkers( lat = trend_data$LAT, lng = trend_data$LON,
+                            icon = ~PfeilIcons[trend_data$trendinput] ,
+                            label = trend_data$NAME
+      )
+    }
+    # Marker hinzufügen für Feuer symbole
+    if (input$var_zahlung) {
+      proxy %>% addMarkers( lat = pay_data$LAT, lng = pay_data$LON,
+                            icon = ~FeuerIcons[pay_data$payment_stop] ,
+                            label = pay_data$NAME
+      )
+    }
   })
   
-
 }
 
 # shinyApp
