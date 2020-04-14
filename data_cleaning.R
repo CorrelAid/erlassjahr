@@ -36,7 +36,7 @@ names(sr20_erlassjahr)[14] <- "external_debt_service_exp"
 
 sr20_erlassjahr %<>% 
   filter(!is.na(Land)) %>% 
-  rename(country = `Land`,
+  dplyr::rename(country = `Land`,
          public_debt_bip = `Öffentliche Schulden / BIP`,
          public_debt_bip2 = `Wert`, #rename to make inline with app.R coding
          trend_pdb = `Trend1`,
@@ -75,17 +75,20 @@ sr20_erlassjahr$region <- zoo::na.locf(sr20_erlassjahr$region)
 sr20_erlassjahr <- sr20_erlassjahr[!is.na(sr20_erlassjahr$country_A3), ]
 
 # add all country names
+country_all <- country_all[1:194,1]
 names(country_all)[1] <- "country_A3"
+country_all <- rbind(country_all, "Nordkorea")
+country_all <- rbind(country_all, "Kuba")
 
-custom_match2 <- c("Eswatini" = "SWZ", "Kosovo" = "RKS", "Micronesia" = "FSM", "S†o Tom_ and PrÍncipe" = "STP")
+custom_match2 <- c("Eswatini" = "SWZ", "Kosovo" = "RKS", "Micronesia" = "FSM", "S†o Tom_ and PrÍncipe" = "STP", "Nordkorea" = "PRK", "Kuba" = "CUB")
 country_all$country_A3 <- countrycode::countrycode(country_all$country_A3, 
                                                        "country.name", "iso3c", custom_match = custom_match2)
-country_all <- country_all[,1]
 
 sr20_erlassjahr <- merge(sr20_erlassjahr, country_all, by = "country_A3", all.y = TRUE)
 # create a variable that is 1 if the country is part of the sample and 0 otherwise
 
 sr20_erlassjahr$sample <- ifelse(is.na(sr20_erlassjahr$country), 0, 1)
+sr20_erlassjahr$sample <- ifelse(sr20_erlassjahr$country_A3 == "CUB" | sr20_erlassjahr$country_A3 == "PRK", 1, sr20_erlassjahr$sample)
 
 ##--------------------##
 ##  Rescale Variables ##
@@ -163,16 +166,33 @@ sr20_erlassjahr$debt_sit_cat <-
 ## Payment Situation ##
 #######################
 
-data$payment_stop <- NA
-data$payment_stop[data$ISO3 == "ZWE"] <- "feuer_rot"
-data$payment_stop[data$ISO3 == "MOZ"] <- "feuer_orange"
-data$payment_stop[data$ISO3 == "IRQ"] <- "feuer_grau"
+payment_high <- c("ERI", "CUB", "PRK", "ZWE", "SOM", "SDN", "SYR")
+payment_med <- c("ARG", "YEM", "GMB", "GRD", "MOZ", "COG", "STP")
+payment_low <- c("IRQ", "KHM", "UKR")
+
+sr20_erlassjahr$payment_stop <-
+  ifelse(
+    sr20_erlassjahr$country_A3 %in% payment_high,
+    "feuer_rot",
+    ifelse(
+       sr20_erlassjahr$country_A3 %in% payment_med,
+      "feuer_orange",
+      ifelse(sr20_erlassjahr$country_A3 %in% payment_low, "feuer_grau", NA)
+    )
+  )
+
+# rename country_A3 variable
+names(sr20_erlassjahr)[1] <- "ISO3"
 
 ##------------------##
 ## Save the Dataset ##
 ##------------------##
 
 save(sr20_erlassjahr, file = "sr20_erlassjahr.RData")
+
+
+
+
 
 
 ##---------------------------------##
@@ -186,35 +206,35 @@ save(sr20_erlassjahr, file = "sr20_erlassjahr.RData")
 ####################
 
 ## Create five categories for debt situation
-
-# Function to recode the five indicators according to the coding scheme in Schuldenreport 2020 (page 17)
-filter_recode <- function(var, filter) {
-  var <- ifelse(var < filter[1],
-                0,
-                ifelse(
-                  var >= filter[1] &
-                    var <= filter[2],
-                  1,
-                  ifelse(var > filter[2] &
-                           var <= filter[3],
-                         2,
-                         ifelse(var > filter[3],
-                                3,
-                                NA))
-                ))
-  return(var)
-}
-
-# Define thresholds for each filter category
-public_debt_bip_filter <- c(50, 75, 100)
-public_debt_state_rev_filter <- c(200, 300, 400)
-foreign_debt_bip_filter <- c(40, 60, 80)
-foreign_debt_exp_filter <- c(150, 225, 300)
-external_debt_service_exp_filter <- c(15, 22.5, 30)
-
-# Apply filter categories and recode function to each of the five category variables
-sr20_erlassjahr$public_debt_bip2 <- filter_recode(sr20_erlassjahr$public_debt_bip, public_debt_bip_filter)
-sr20_erlassjahr$public_debt_state_rev2 <- filter_recode(sr20_erlassjahr$public_debt_state_rev, public_debt_state_rev_filter)
-sr20_erlassjahr$foreign_debt_bip2 <- filter_recode(sr20_erlassjahr$foreign_debt_bip, foreign_debt_bip_filter)
-sr20_erlassjahr$foreign_debt_exp2 <- filter_recode(sr20_erlassjahr$foreign_debt_exp, foreign_debt_exp_filter)
-sr20_erlassjahr$external_debt_service_exp2 <- filter_recode(sr20_erlassjahr$external_debt_service_exp, external_debt_service_exp_filter)
+# 
+# # Function to recode the five indicators according to the coding scheme in Schuldenreport 2020 (page 17)
+# filter_recode <- function(var, filter) {
+#   var <- ifelse(var < filter[1],
+#                 0,
+#                 ifelse(
+#                   var >= filter[1] &
+#                     var <= filter[2],
+#                   1,
+#                   ifelse(var > filter[2] &
+#                            var <= filter[3],
+#                          2,
+#                          ifelse(var > filter[3],
+#                                 3,
+#                                 NA))
+#                 ))
+#   return(var)
+# }
+# 
+# # Define thresholds for each filter category
+# public_debt_bip_filter <- c(50, 75, 100)
+# public_debt_state_rev_filter <- c(200, 300, 400)
+# foreign_debt_bip_filter <- c(40, 60, 80)
+# foreign_debt_exp_filter <- c(150, 225, 300)
+# external_debt_service_exp_filter <- c(15, 22.5, 30)
+# 
+# # Apply filter categories and recode function to each of the five category variables
+# sr20_erlassjahr$public_debt_bip2 <- filter_recode(sr20_erlassjahr$public_debt_bip, public_debt_bip_filter)
+# sr20_erlassjahr$public_debt_state_rev2 <- filter_recode(sr20_erlassjahr$public_debt_state_rev, public_debt_state_rev_filter)
+# sr20_erlassjahr$foreign_debt_bip2 <- filter_recode(sr20_erlassjahr$foreign_debt_bip, foreign_debt_bip_filter)
+# sr20_erlassjahr$foreign_debt_exp2 <- filter_recode(sr20_erlassjahr$foreign_debt_exp, foreign_debt_exp_filter)
+# sr20_erlassjahr$external_debt_service_exp2 <- filter_recode(sr20_erlassjahr$external_debt_service_exp, external_debt_service_exp_filter)
