@@ -67,6 +67,35 @@ data$payment_stop[data$ISO3 == "IRQ"] <- "feuer_grau"
 map <- sp::merge(map, data, by.x="ISO3", duplicateGeoms=TRUE)
 #map@data <- inner_join(data[ordercounties,], map@data, by = "ISO3")
 
+##--------------------------------------------------##
+## Functions                                        ##
+##--------------------------------------------------##
+
+# Make IconList
+PfeilIcons <- iconList(
+  minus_one = makeIcon(iconUrl = "pfeil_rot.jpg",
+                       iconWidth = 10, iconHeight = 10,
+                       iconAnchorX = 0, iconAnchorY = 0),
+  zero = makeIcon(iconUrl = "pfeil_gelb.jpg",
+                  iconWidth = 10, iconHeight = 10,
+                  iconAnchorX = 0, iconAnchorY = 0),
+  one = makeIcon(iconUrl = "pfeil_gruen.jpg",
+                 iconWidth = 10, iconHeight = 10,
+                 iconAnchorX = 0, iconAnchorY = 0)
+)
+
+FeuerIcons <- iconList(
+  feuer_rot = makeIcon(iconUrl = "feuer_1.jpg",
+                       iconWidth = 10, iconHeight = 10,
+                       iconAnchorX = -2, iconAnchorY = -2),
+  feuer_orange = makeIcon(iconUrl = "feuer_2.jpg",
+                          iconWidth = 10, iconHeight = 10,
+                          iconAnchorX = -2, iconAnchorY = -2),
+  feuer_grau = makeIcon(iconUrl = "feuer_grau.jpg",
+                        iconWidth = 10, iconHeight = 10,
+                        iconAnchorX = -2, iconAnchorY = -2)
+)
+
 
 ##--------------------------------------------------##
 ## User Interface Shiny                             ##
