@@ -120,6 +120,20 @@ sr20_erlassjahr$trend_fdp <- trend_recode(sr20_erlassjahr$trend_fdp)
 sr20_erlassjahr$trend_fde <- trend_recode(sr20_erlassjahr$trend_fde)
 sr20_erlassjahr$trend_edse <- trend_recode(sr20_erlassjahr$trend_edse)
 
+###############
+## Trend New ##
+###############
+
+trend_new_recode <- function(var){
+  var <- plyr::revalue(as.character(as.english(var)), c("minus one"="minus_one"))
+}
+
+sr20_erlassjahr$trend_new <- trend_new_recode(sr20_erlassjahr$trend)
+sr20_erlassjahr$trend_pdb_new <- trend_new_recode(sr20_erlassjahr$trend_pdb)
+sr20_erlassjahr$trend_pdsr_new <- trend_new_recode(sr20_erlassjahr$trend_pdsr)
+sr20_erlassjahr$trend_fdp_new <- trend_new_recode(sr20_erlassjahr$trend_fdp)
+sr20_erlassjahr$trend_fde_new <- trend_new_recode(sr20_erlassjahr$trend_fde)
+sr20_erlassjahr$trend_edse_new <- trend_new_recode(sr20_erlassjahr$trend_edse)
 
 ##############
 ## Debt Sit ##
@@ -142,11 +156,23 @@ sr20_erlassjahr$debt_sit_cat <-
     )
   )
 
-sr20_erlassjahr$debt_sit_cat <- factor(sr20_erlassjahr$debt_sit_cat)
-levels(sr20_erlassjahr$debt_sit_cat) <- c("nicht kritisch", "leicht kritisch", "kritisch", "sehr kritisch")
+# sr20_erlassjahr$debt_sit_cat <- factor(sr20_erlassjahr$debt_sit_cat)
+# levels(sr20_erlassjahr$debt_sit_cat) <- c("nicht kritisch", "leicht kritisch", "kritisch", "sehr kritisch")
+
+#######################
+## Payment Situation ##
+#######################
+
+data$payment_stop <- NA
+data$payment_stop[data$ISO3 == "ZWE"] <- "feuer_rot"
+data$payment_stop[data$ISO3 == "MOZ"] <- "feuer_orange"
+data$payment_stop[data$ISO3 == "IRQ"] <- "feuer_grau"
+
+##------------------##
+## Save the Dataset ##
+##------------------##
 
 save(sr20_erlassjahr, file = "sr20_erlassjahr.RData")
-
 
 
 ##---------------------------------##
