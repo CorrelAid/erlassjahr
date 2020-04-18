@@ -43,25 +43,9 @@ map <- readOGR(dsn=path.expand(shape_path), layer="TM_WORLD_BORDERS_SIMPL-0.3", 
 # Load Data
 load("sr20_erlassjahr.RData")
 
-# Modify Data (evt in data_cleaning?)
-data <- plyr::rename(sr20_erlassjahr, c("country_A3" = "ISO3"))
-data <- as.data.frame(data) # data is loaded as tibble but needs to be converted to data.frame for merging
-data$debt_sit_cat2 <- as.numeric(data$debt_sit_cat)
-data$debt_sit_cat2 <- data$debt_sit_cat2 -1
+data <- sr20_erlassjahr
 
-# write a function for this?
-data$trend_new <- revalue(as.character(as.english(data$trend)), c("minus one"="minus_one"))
-data$trend_pdb <- revalue(as.character(as.english(data$trend_pdb)), c("minus one"="minus_one"))
-data$trend_pdsr <- revalue(as.character(as.english(data$trend_pdsr)), c("minus one"="minus_one")) 
-data$trend_fdp <- revalue(as.character(as.english(data$trend_fdp)), c("minus one"="minus_one"))
-data$trend_fde <- revalue(as.character(as.english(data$trend_fde)), c("minus one"="minus_one")) 
-data$trend_edse <- revalue(as.character(as.english(data$trend_edse)), c("minus one"="minus_one")) 
 data[data==""]<-NA
-
-data$payment_stop <- NA
-data$payment_stop[data$ISO3 == "ZWE"] <- "feuer_rot"
-data$payment_stop[data$ISO3 == "MOZ"] <- "feuer_orange"
-data$payment_stop[data$ISO3 == "IRQ"] <- "feuer_grau"
 
 # Combine data:
 map <- sp::merge(map, data, by.x="ISO3", duplicateGeoms=TRUE)
