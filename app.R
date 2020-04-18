@@ -15,7 +15,7 @@
 ## Prerequisits                                     ##
 ##--------------------------------------------------##
 
-install.packages("reactlog")
+# install.packages("reactlog")
 library(reactlog)
 options(shiny.reactlog=TRUE) # package to track dependencies of shiny app
 
@@ -343,9 +343,14 @@ server <- function(input, output) {
 
 # shinyApp
 shinyApp(ui = ui, server = server)
-runApp('./app.R')
-
+# runApp('./app.R')
+# show log file
+shiny::reactlogShow()
 
 ################# USeful Codewaste:
 # c("Land mit geringem Einkommen", "Land mit mittlerem Einkommen im unteren Bereich", "Land mit mittlerem Einkommen im oberen Bereich", 
 #   "Land mit hohem Einkommen oder ohne Angaben"),
+# clearMarkers() %>%
+#   if (input$markers) {
+#     addMarkers(lat = map@data$LAT, lng = map@data$LON, icon = ~PfeilIcons[data$trend_new], label = map@data$NAME) #~PfeilIcons[map@data$trend_new]
+#   } 
