@@ -183,7 +183,7 @@ sr20_erlassjahr$trend_edse_new <- trend_new_recode(sr20_erlassjahr$trend_edse)
 ## Debt Sit ##
 ##############
 
-sr20_erlassjahr$debt_sit_cat <-
+sr20_erlassjahr$debt_sit_cat2 <-
   ifelse(
     sr20_erlassjahr$exceedance == 0,
     0,
@@ -199,6 +199,9 @@ sr20_erlassjahr$debt_sit_cat <-
       )
     )
   )
+
+sr20_erlassjahr$debt_sit_cat <- factor(sr20_erlassjahr$debt_sit_cat2)
+levels(sr20_erlassjahr$debt_sit_cat) <- c("nicht kritisch", "leicht kritisch", "kritisch", "sehr kritisch")
 
 #######################
 ## Payment Situation ##
