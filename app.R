@@ -45,6 +45,10 @@ load("sr20_erlassjahr.RData")
 
 data <- sr20_erlassjahr
 
+
+data$country[c(9, 10)]  <- c("Australia", "Austria")
+data$debt_sit_cat2[c(9, 10)] <- c(-1, -1)
+
 data[data==""]<-NA
 
 # Combine data:
@@ -222,14 +226,6 @@ server <- function(input, output) {
     }
   })
   
-  # Select input for mouseover:
-  # mouseover <- reactive({
-  #   if (input$var_debtindikator != "debt_sit_cat") {
-  #     text_var <- gsub('.$', '',input$var_debtindikator)
-  #   } else {
-  #     text_var <- input$var_debtindikator
-  #   } 
-  # })
   # create reactive data output
   output$map1 <- renderLeaflet({
     
@@ -251,25 +247,18 @@ server <- function(input, output) {
     map@data <- datafiltered[ordercounties, ]
     str(map@data)
    
-    # trend_data
-    #trend_data <-
     
     # Select indicators for polygons
     map$variableplot <- map@data[, input$var_debtindikator]
     
-    # new
-    #map@data <- filteredData()
-    
-    #map@data$variableplot <- map@data[, input$var_debtindikator]
-    
+  
     #Select input for mouseover text
-    # var_mouseover <- mouseover()
-    # map$mouseover <- map@data[, var_mouseover]
     map$mouseover <- map@data[,gsub('.$', '',input$var_debtindikator)]
     
+    # Select input for markers
     trendfilter <- filteredTrend()
     
-    #trendinput <- print(paste0("map@data$", trendfilter), quote = FALSE)
+    
     trend_data <- map@data[, which(names(map@data) %in% c("LON", "LAT", trendfilter))]
     trend_data <- trend_data[complete.cases(trend_data),]
     
@@ -278,8 +267,8 @@ server <- function(input, output) {
     # data für feuersymbole
     pay_data <- map@data[!is.na(map@data$payment_stop),]
     # Create color palette
-    pal <- colorFactor(c(n.kritisch, l.kritisch, kritisch, s.kritisch
-    ), levels = c(0, 1, 2, 3), na.color = "#808080" )
+    pal <- colorFactor(c(nT.Analyse, n.kritisch, l.kritisch, kritisch, s.kritisch
+    ), levels = c(-1, 0, 1, 2, 3), na.color = "#808080" )
     
     # Create text shown when mouse glides over countries
     mytext <- paste0(
@@ -310,13 +299,13 @@ server <- function(input, output) {
       # Make legend
       leaflet::addLegend(position = "bottomright",
                          # Specify colors manually b/c pal function does not show colors in legend
-                         colors = c(s.kritisch, kritisch,  l.kritisch, n.kritisch ), 
-                         values = c("sehr kritisch", "kritisch", "leicht kritisch",
-                                    "nicht kritisch", "keine Daten vorhanden"),
-                         na.label = "keine Daten vorhanden",
+                         colors = c(s.kritisch, kritisch,  l.kritisch, n.kritisch, k.Daten, nT.Analyse ), 
+                         #values = c("sehr kritisch", "kritisch", "leicht kritisch",
+                         #           "nicht kritisch", "keine Daten vorhanden", "Nicht Teil der Betrachtung"),
+                         #na.label = "keine Daten vorhanden",
                          opacity = 0.7, title = "Verschuldungssituation",
                          labels = c("sehr kritisch", "kritisch", "leicht kritisch",
-                                    "nicht kritisch") 
+                                    "nicht kritisch", "keine Daten vorhanden", "Nicht Teil der Betrachtung") 
       )
     proxy <- leafletProxy(mapId = "map1", data = trend_data) %>%
       clearMarkers()
