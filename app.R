@@ -49,6 +49,14 @@ data <- sr20_erlassjahr
 data$country[c(9, 10)]  <- c("Australia", "Austria")
 data$debt_sit_cat2[c(9, 10)] <- c(-1, -1)
 
+levels(data$debt_sit_cat)[length(levels(data$debt_sit_cat))+1] <- "nicht Teil der Betrachtung"
+data$debt_sit_cat[c(9, 10)] <- c("nicht Teil der Betrachtung", "nicht Teil der Betrachtung")
+
+data$public_debt_bip2[c(9, 10)] <- c(-1, -1)
+levels(data$public_debt_bip)[length(levels(data$public_debt_bip))+1] <- "nicht Teil der Betrachtung"
+data$public_debt_bip[c(9, 10)] <- c("nicht Teil der Betrachtung", "nicht Teil der Betrachtung")
+# ... für alle weiteren indikatoren Anpassen
+
 data[data==""]<-NA
 
 # Combine data:
