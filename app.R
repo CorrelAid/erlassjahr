@@ -181,6 +181,9 @@ k.Daten <- "#808080"
 nT.Analyse <-  "#F0F2E8"
 hint.grnd <- " #B3F0D4"
 
+# helperfunction to read corrct trend data:
+
+
 ##--------------------------------------------------##
 ## Server für Shiny Map                             ##
 ##--------------------------------------------------##
@@ -190,32 +193,32 @@ server <- function(input, output) {
   
   # Select Data according to input
   filteredData <- reactive({
-    if (input$var_income == "Alle") {
-      data <- subset(map@data, income == income) 
-    } else {
+    if (input$var_income == "Alle" & input$var_region == "Alle") {
+      data <- map@data 
+    } else if (input$var_income != "Alle" & input$var_region == "Alle") {
       data <- subset(map@data, income == input$var_income)
-    }
-    if (input$var_region == "Alle") {
-      data <- subset(map@data, region == region) 
+    } else if (input$var_income == "Alle" & input$var_region != "Alle") {
+      data <- subset(map@data, region == input$var_region) 
     } else {
-      data <- subset(map@data, region == input$var_region)
+      data <- subset(map@data, region == input$var_region & income == input$var_income)
     }
     # add regional input when constructed columns with region input
   })
+  #new.data <- data[ which( data$V1 > 2 | data$V2 < 4) , ]
   
   filteredTrend <- reactive({
     if (input$var_debtindikator == "debt_sit_cat2") {
       trend_var <- "trend_new"
     } else if (input$var_debtindikator == "public_debt_bip2") {
-      trend_var <- "trend_pdb"
+      trend_var <- "trend_pdb_new"
     } else if (input$var_debtindikator == "public_debt_state_rev2") {
-      trend_var <- "trend_pdsr"
+      trend_var <- "trend_pdsr_new"
     } else if (input$var_debtindikator == "foreign_debt_bip2") {
-      trend_var <- "trend_fdp"
+      trend_var <- "trend_fdp_new"
     } else if (input$var_debtindikator == "foreign_debt_exp2") {
-      trend_var <- "trend_fde"
+      trend_var <- "trend_fde_new"
     } else  {
-      trend_var <- "trend_edse"
+      trend_var <- "trend_edse_new"
     }
   })
   
@@ -246,9 +249,18 @@ server <- function(input, output) {
     # match selected rows in data with spacial data
     ordercounties <- match(map@data$ISO3, datafiltered$ISO3)
     map@data <- datafiltered[ordercounties, ]
+    str(map@data)
+   
+    # trend_data
+    #trend_data <-
     
     # Select indicators for polygons
     map$variableplot <- map@data[, input$var_debtindikator]
+    
+    # new
+    #map@data <- filteredData()
+    
+    #map@data$variableplot <- map@data[, input$var_debtindikator]
     
     #Select input for mouseover text
     # var_mouseover <- mouseover()
@@ -258,7 +270,9 @@ server <- function(input, output) {
     trendfilter <- filteredTrend()
     
     #trendinput <- print(paste0("map@data$", trendfilter), quote = FALSE)
-    trend_data <- map@data[!is.na(trendfilter),]
+    trend_data <- map@data[, which(names(map@data) %in% c("LON", "LAT", trendfilter))]
+    trend_data <- trend_data[complete.cases(trend_data),]
+    
     trend_data$trendinput <- trend_data[, which(colnames(trend_data)==trendfilter)]
     
     # data für feuersymbole
@@ -270,7 +284,7 @@ server <- function(input, output) {
     # Create text shown when mouse glides over countries
     mytext <- paste0(
       "<b>", map@data$country, "</b>","<br/>",
-      "Verschuldungssituation: ", "<b>", map$mouseover, "</b>" , "%") %>%
+      "Verschuldungssituation in %: ", "<b>", map$mouseover, "</b>" ) %>%
       lapply(htmltools::HTML)
     # Transform shapefile for poligon input
     map_ll <- spTransform(map, CRS("+init=epsg:4326"))
