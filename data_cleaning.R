@@ -203,6 +203,30 @@ sr20_erlassjahr$debt_sit_cat2 <-
 sr20_erlassjahr$debt_sit_cat <- factor(sr20_erlassjahr$debt_sit_cat2)
 levels(sr20_erlassjahr$debt_sit_cat) <- c("nicht kritisch", "leicht kritisch", "kritisch", "sehr kritisch")
 
+################
+## Indicators ##
+################
+
+indicator_recode <- function(var){
+  var <- ifelse(sr20_erlassjahr$sample == 0, 0, var)
+}
+
+sr20_erlassjahr$public_debt_bip <- indicator_recode(sr20_erlassjahr$public_debt_bip)
+sr20_erlassjahr$public_debt_state_rev <- indicator_recode(sr20_erlassjahr$public_debt_state_rev)
+sr20_erlassjahr$foreign_debt_bip <- indicator_recode(sr20_erlassjahr$foreign_debt_bip)
+sr20_erlassjahr$foreign_debt_exp <- indicator_recode(sr20_erlassjahr$foreign_debt_exp)
+sr20_erlassjahr$external_debt_service_exp <- indicator_recode(sr20_erlassjahr$external_debt_service_exp)
+
+indicator2_recode <- function(var){
+  var <- ifelse(sr20_erlassjahr$sample == 0, -1, var)
+}
+
+sr20_erlassjahr$public_debt_bip2 <- indicator2_recode(sr20_erlassjahr$public_debt_bip2)
+sr20_erlassjahr$public_debt_state_rev2 <- indicator2_recode(sr20_erlassjahr$public_debt_state_rev2)
+sr20_erlassjahr$foreign_debt_bip2 <- indicator2_recode(sr20_erlassjahr$foreign_debt_bip2)
+sr20_erlassjahr$foreign_debt_exp2 <- indicator2_recode(sr20_erlassjahr$foreign_debt_exp2)
+sr20_erlassjahr$external_debt_service_exp2 <- indicator2_recode(sr20_erlassjahr$external_debt_service_exp2)
+
 #######################
 ## Payment Situation ##
 #######################
