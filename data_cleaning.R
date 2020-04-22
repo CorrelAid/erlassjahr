@@ -27,7 +27,7 @@ sr20_erlassjahr <- sr20_erlassjahr[1:129,1:22] # keep only relevant variables an
 
 ##---- Total Countries ----##
 country_all <- read_xlsx("SR20 Überblickstabelle-191107.xlsx", sheet =  7)
-country_all <- country_all[1:194,1]
+country_all <- country_all[1:194,c(1,4,5)]
 
 ##---- Risk Overview ----##
 risks_overview <- read_xlsx("Risiken-Überblick.xlsx")
@@ -90,22 +90,27 @@ sr20_erlassjahr <- sr20_erlassjahr[!is.na(sr20_erlassjahr$ISO3), ]
 ##---- Total Countries ----##
 
 # Rename country name variable & add missing countries
-names(country_all)[1] <- "ISO3"
-country_all <- rbind(country_all, "Nordkorea")
-country_all <- rbind(country_all, "Kuba")
+names(country_all)[1:3] <- c("ISO3", "oecd", "no_data")
+country_all <- as.data.frame(country_all)
+
+additional_countries <- data.frame(ISO3 = c("Nordkorea", "Kuba"), oecd = c(NA, NA), no_data = c(1,1))
+additional_countries$ISO3 <- as.character(additional_countries$ISO3)
+country_all <- rbind(country_all, additional_countries)
 
 # Convert country names (from English to ISO3)
 custom_match2 <- c("Eswatini" = "SWZ", "Kosovo" = "RKS", "Micronesia" = "FSM", "S†o Tom_ and PrÍncipe" = "STP", "Nordkorea" = "PRK", "Kuba" = "CUB")
 country_all$ISO3 <- countrycode::countrycode(country_all$ISO3, 
                                                        "country.name", "iso3c", custom_match = custom_match2)
 
+country_all[is.na(country_all)] <- 0
+
 # Merge total countries with main data
 sr20_erlassjahr <- merge(sr20_erlassjahr, country_all, by = "ISO3", all.y = TRUE)
 
-# Create a sample variable that is 1 if the country is part of the sample and 0 otherwise
-sr20_erlassjahr$sample <- ifelse(is.na(sr20_erlassjahr$country), 0, 1)
-# the two countries that were additionally added need to be coded manually to become part of the sample
-sr20_erlassjahr$sample <- ifelse(sr20_erlassjahr$ISO3 == "CUB" | sr20_erlassjahr$ISO3 == "PRK", 1, sr20_erlassjahr$sample)
+# # Create a sample variable that is 1 if the country is part of the sample and 0 otherwise
+# sr20_erlassjahr$sample <- ifelse(sr20_erlassjahr$oecd == 1, 1, 0)
+# # the two countries that were additionally added need to be coded manually to become part of the sample
+# sr20_erlassjahr$sample <- ifelse(sr20_erlassjahr$ISO3 == "CUB" | sr20_erlassjahr$ISO3 == "PRK", 1, sr20_erlassjahr$sample)
 
 ##---- Risk Overview ----##
 
@@ -208,7 +213,7 @@ levels(sr20_erlassjahr$debt_sit_cat) <- c("nicht kritisch", "leicht kritisch", "
 ################
 
 indicator_recode <- function(var){
-  var <- ifelse(sr20_erlassjahr$sample == 0, 0, var)
+  var <- ifelse(sr20_erlassjahr$oecd == 1, 0, var)
 }
 
 sr20_erlassjahr$public_debt_bip <- indicator_recode(sr20_erlassjahr$public_debt_bip)
@@ -218,7 +223,7 @@ sr20_erlassjahr$foreign_debt_exp <- indicator_recode(sr20_erlassjahr$foreign_deb
 sr20_erlassjahr$external_debt_service_exp <- indicator_recode(sr20_erlassjahr$external_debt_service_exp)
 
 indicator2_recode <- function(var){
-  var <- ifelse(sr20_erlassjahr$sample == 0, -1, var)
+  var <- ifelse(sr20_erlassjahr$oecd == 1, -1, var)
 }
 
 sr20_erlassjahr$public_debt_bip2 <- indicator2_recode(sr20_erlassjahr$public_debt_bip2)
