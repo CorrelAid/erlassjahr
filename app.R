@@ -14,21 +14,25 @@
 ##--------------------------------------------------##
 ## Prerequisits                                     ##
 ##--------------------------------------------------##
-
-# install.packages("reactlog")
-library(reactlog)
-options(shiny.reactlog=TRUE) # package to track dependencies of shiny app
-
-library(shiny)
-library(DT)
-library(rgdal)
-library(leaflet)
-library(maps) # For Capital city coordinates
-library(dplyr) # For Data Manipulation
-library(english) # Transform numbers to words
-library(plyr) # to use the revalue function (can be edited to rely on dplyr) -> TO DO: AS
-library(tidyverse)
-library("tidylog", warn.conflicts = FALSE) # feedback on join functions
+install.packages("pacman")
+pacman::p_load(
+  reactlog,
+  shiny,
+  DT,
+  rgdal,
+  leaflet,
+  maps,
+  dplyr,
+  english,
+  plyr,
+  tidyverse,
+  tidylog,
+  readxl,
+  countrycode,
+  magrittr,
+  zoo,
+  english
+) 
 
 ##--------------------------------------------------##
 ## Load Data                                        ##
@@ -46,16 +50,16 @@ load("sr20_erlassjahr.RData")
 data <- sr20_erlassjahr
 
 
-data$country[c(9, 10)]  <- c("Australia", "Austria")
-data$debt_sit_cat2[c(9, 10)] <- c(-1, -1)
-
-levels(data$debt_sit_cat)[length(levels(data$debt_sit_cat))+1] <- "nicht Teil der Betrachtung"
-data$debt_sit_cat[c(9, 10)] <- c("nicht Teil der Betrachtung", "nicht Teil der Betrachtung")
-
-data$public_debt_bip2[c(9, 10)] <- c(-1, -1)
-levels(data$public_debt_bip)[length(levels(data$public_debt_bip))+1] <- "nicht Teil der Betrachtung"
-data$public_debt_bip[c(9, 10)] <- c("nicht Teil der Betrachtung", "nicht Teil der Betrachtung")
-# ... für alle weiteren indikatoren Anpassen
+# data$country[c(9, 10)]  <- c("Australia", "Austria")
+# data$debt_sit_cat2[c(9, 10)] <- c(-1, -1)
+# 
+# levels(data$debt_sit_cat)[length(levels(data$debt_sit_cat))+1] <- "nicht Teil der Betrachtung"
+# data$debt_sit_cat[c(9, 10)] <- c("nicht Teil der Betrachtung", "nicht Teil der Betrachtung")
+# 
+# data$public_debt_bip2[c(9, 10)] <- c(-1, -1)
+# levels(data$public_debt_bip)[length(levels(data$public_debt_bip))+1] <- "nicht Teil der Betrachtung"
+# data$public_debt_bip[c(9, 10)] <- c("nicht Teil der Betrachtung", "nicht Teil der Betrachtung")
+# # ... für alle weiteren indikatoren Anpassen
 
 data[data==""]<-NA
 
@@ -158,11 +162,11 @@ ui <- fluidPage(
       # drop down input selection Risikofaktoren
       selectInput("var_risiko", 
                   "Risikofaktoren wählen", 
-                  choices = list(`Alle` = "Alle",
-                                 `Extraktivismus` = "Asia", 
-                                 `politische und soziale Fragilität` = "Europe", 
-                                 `Schuldenstruktur` = "Latin America", 
-                                 `Naturkathastrophen / Klimawandel` = "Middle East" 
+                  choices = list(#`Alle` = "Alle",
+                    `Extraktivismus` = "extractivism", 
+                    `politische und soziale Fragilität` = "fragility", 
+                    `Schuldenstruktur` = "debt_prob", 
+                    `Naturkathastrophen / Klimawandel` = "vulnerability" 
                   )
       ),
       
@@ -234,6 +238,22 @@ server <- function(input, output) {
     }
   })
   
+  filteredTrend <- reactive({
+    if (input$var_debtindikator == "debt_sit_cat2") {
+      trend_var <- "trend_new"
+    } else if (input$var_debtindikator == "public_debt_bip2") {
+      trend_var <- "trend_pdb_new"
+    } else if (input$var_debtindikator == "public_debt_state_rev2") {
+      trend_var <- "trend_pdsr_new"
+    } else if (input$var_debtindikator == "foreign_debt_bip2") {
+      trend_var <- "trend_fdp_new"
+    } else if (input$var_debtindikator == "foreign_debt_exp2") {
+      trend_var <- "trend_fde_new"
+    } else  {
+      trend_var <- "trend_edse_new"
+    }
+  })  
+  
   # create reactive data output
   output$map1 <- renderLeaflet({
     
@@ -254,12 +274,14 @@ server <- function(input, output) {
     ordercounties <- match(map@data$ISO3, datafiltered$ISO3)
     map@data <- datafiltered[ordercounties, ]
     str(map@data)
-   
+    
     
     # Select indicators for polygons
     map$variableplot <- map@data[, input$var_debtindikator]
     
-  
+    
+    map$Lineplot <- map@data[, input$var_risiko]
+    
     #Select input for mouseover text
     map$mouseover <- map@data[,gsub('.$', '',input$var_debtindikator)]
     
@@ -274,6 +296,11 @@ server <- function(input, output) {
     
     # data für feuersymbole
     pay_data <- map@data[!is.na(map@data$payment_stop),]
+    
+    # Create color palette
+    pali <- colorFactor(c( "#D3D3D3", "#FFFFFF") ,
+                        levels = c(0, 1), na.color = "#808080" )
+    
     # Create color palette
     pal <- colorFactor(c(nT.Analyse, n.kritisch, l.kritisch, kritisch, s.kritisch
     ), levels = c(-1, 0, 1, 2, 3), na.color = "#808080" )
@@ -314,7 +341,20 @@ server <- function(input, output) {
                          opacity = 0.7, title = "Verschuldungssituation",
                          labels = c("sehr kritisch", "kritisch", "leicht kritisch",
                                     "nicht kritisch", "keine Daten vorhanden", "Nicht Teil der Betrachtung") 
-      )
+      ) #%>%
+      # addPolygons( 
+      #   fillColor = ~pali(Lineplot),
+      #   color = "white",
+      #   dashArray = "3",#,
+      #   # weight = 0.1, 
+      #   # smoothFactor = 0.5,
+      #   # opacity = 0.7,
+      #   fillOpacity = 0
+      # )
+      # 
+    
+    
+    
     proxy <- leafletProxy(mapId = "map1", data = trend_data) %>%
       clearMarkers()
     
@@ -333,6 +373,23 @@ server <- function(input, output) {
       )
     }
   })
+  # observe({
+  # 
+  #   #datafiltered <- filteredData()
+  # 
+  #   # match selected rows in data with spacial data
+  #   #ordercounties <- match(map@data$ISO3, datafiltered$ISO3)
+  #   #map@data <- datafiltered[ordercounties, ]
+  # 
+  #   # Select indicators for polygons
+  #   #map$riskvar <- map@data[, input$var_risiko]
+  # 
+  #   #map_ll <- spTransform(map, CRS("+init=epsg:4326"))
+  # 
+  #   l <- leafletProxy() %>%
+  #     addPolylines()
+  # 
+  # })
   
 }
 
