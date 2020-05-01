@@ -31,9 +31,14 @@ pacman::p_load(
   countrycode,
   magrittr,
   zoo,
-  english
+  english,
+  modules
 ) 
 
+# IMplement modules for cleaning code:
+m <- modules::use("graphics.R")
+FeuerIcons <- m$FeuerIcons()
+PfeilIcons <- m$PfeilIcons()
 ##--------------------------------------------------##
 ## Load Data                                        ##
 ##--------------------------------------------------##
@@ -42,13 +47,14 @@ pacman::p_load(
 shape_path <- "TM_WORLD_BORDERS_SIMPL-0.3.shp"
 encoding <- "UTF-8"
 
-map <- readOGR(dsn=path.expand(shape_path), layer="TM_WORLD_BORDERS_SIMPL-0.3", encoding = encoding)
+map <- readOGR(dsn=path.expand(shape_path), 
+               layer="TM_WORLD_BORDERS_SIMPL-0.3", 
+               encoding = encoding)
 
 # Load Data
 load("sr20_erlassjahr.RData")
-
 data <- sr20_erlassjahr
-
+data[data==""]<-NA
 
 # data$country[c(9, 10)]  <- c("Australia", "Austria")
 # data$debt_sit_cat2[c(9, 10)] <- c(-1, -1)
@@ -61,40 +67,9 @@ data <- sr20_erlassjahr
 # data$public_debt_bip[c(9, 10)] <- c("nicht Teil der Betrachtung", "nicht Teil der Betrachtung")
 # # ... für alle weiteren indikatoren Anpassen
 
-data[data==""]<-NA
-
 # Combine data:
 map <- sp::merge(map, data, by.x="ISO3", duplicateGeoms=TRUE)
-#map@data <- inner_join(data[ordercounties,], map@data, by = "ISO3")
 
-##--------------------------------------------------##
-## Functions                                        ##
-##--------------------------------------------------##
-
-# Make IconList
-PfeilIcons <- iconList(
-  minus_one = makeIcon(iconUrl = "pfeil_rot.jpg",
-                       iconWidth = 10, iconHeight = 10,
-                       iconAnchorX = 0, iconAnchorY = 0),
-  zero = makeIcon(iconUrl = "pfeil_gelb.jpg",
-                  iconWidth = 10, iconHeight = 10,
-                  iconAnchorX = 0, iconAnchorY = 0),
-  one = makeIcon(iconUrl = "pfeil_gruen.jpg",
-                 iconWidth = 10, iconHeight = 10,
-                 iconAnchorX = 0, iconAnchorY = 0)
-)
-
-FeuerIcons <- iconList(
-  feuer_rot = makeIcon(iconUrl = "feuer_1.jpg",
-                       iconWidth = 10, iconHeight = 10,
-                       iconAnchorX = -2, iconAnchorY = -2),
-  feuer_orange = makeIcon(iconUrl = "feuer_2.jpg",
-                          iconWidth = 10, iconHeight = 10,
-                          iconAnchorX = -2, iconAnchorY = -2),
-  feuer_grau = makeIcon(iconUrl = "feuer_grau.jpg",
-                        iconWidth = 10, iconHeight = 10,
-                        iconAnchorX = -2, iconAnchorY = -2)
-)
 
 
 ##--------------------------------------------------##
@@ -162,11 +137,12 @@ ui <- fluidPage(
       # drop down input selection Risikofaktoren
       selectInput("var_risiko", 
                   "Risikofaktoren wählen", 
-                  choices = list(#`Alle` = "Alle",
+                  choices = list(#`Keine` = "None",
                     `Extraktivismus` = "extractivism", 
                     `politische und soziale Fragilität` = "fragility", 
                     `Schuldenstruktur` = "debt_prob", 
-                    `Naturkathastrophen / Klimawandel` = "vulnerability" 
+                    `Naturkathastrophen / Klimawandel` = "vulnerability",
+                    selected = NULL
                   )
       ),
       
@@ -196,9 +172,8 @@ n.kritisch <- "#C5C7B8"
 k.Daten <- "#808080"
 nT.Analyse <-  "#F0F2E8"
 hint.grnd <- " #B3F0D4"
-
+risk.fact <- "#3D36C7"
 # helperfunction to read corrct trend data:
-
 
 ##--------------------------------------------------##
 ## Server für Shiny Map                             ##
@@ -238,22 +213,6 @@ server <- function(input, output) {
     }
   })
   
-  filteredTrend <- reactive({
-    if (input$var_debtindikator == "debt_sit_cat2") {
-      trend_var <- "trend_new"
-    } else if (input$var_debtindikator == "public_debt_bip2") {
-      trend_var <- "trend_pdb_new"
-    } else if (input$var_debtindikator == "public_debt_state_rev2") {
-      trend_var <- "trend_pdsr_new"
-    } else if (input$var_debtindikator == "foreign_debt_bip2") {
-      trend_var <- "trend_fdp_new"
-    } else if (input$var_debtindikator == "foreign_debt_exp2") {
-      trend_var <- "trend_fde_new"
-    } else  {
-      trend_var <- "trend_edse_new"
-    }
-  })  
-  
   # create reactive data output
   output$map1 <- renderLeaflet({
     
@@ -261,7 +220,7 @@ server <- function(input, output) {
     leaflet(map, options = leafletOptions(minZoom = 2, maxZoom = 10)) %>%  # 
       addTiles( # urlTemplate = "//{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png"
       ) %>% addProviderTiles(provider = "CartoDB.PositronNoLabels") %>%
-      setView( 0, 0, 2 )
+      setView( 0, 0, 2)
   })
   
   # Display colored countries dependent on the output
@@ -270,25 +229,21 @@ server <- function(input, output) {
     # Choose data based on selected input
     datafiltered <- filteredData()
     
-    # match selected rows in data with spacial data
+    # match selected rows and columns in data with spacial data
     ordercounties <- match(map@data$ISO3, datafiltered$ISO3)
     map@data <- datafiltered[ordercounties, ]
-    str(map@data)
     
-    
-    # Select indicators for polygons
+    # Select Polygons for Debtindikator
     map$variableplot <- map@data[, input$var_debtindikator]
     
-    
-    map$Lineplot <- map@data[, input$var_risiko]
+    # Select Polygons for Riskfactor
+    map$riskplot <- map@data[, input$var_risiko]
     
     #Select input for mouseover text
     map$mouseover <- map@data[,gsub('.$', '',input$var_debtindikator)]
     
     # Select input for markers
     trendfilter <- filteredTrend()
-    
-    
     trend_data <- map@data[, which(names(map@data) %in% c("LON", "LAT", trendfilter))]
     trend_data <- trend_data[complete.cases(trend_data),]
     
@@ -297,14 +252,13 @@ server <- function(input, output) {
     # data für feuersymbole
     pay_data <- map@data[!is.na(map@data$payment_stop),]
     
-    # Create color palette
-    pali <- colorFactor(c( "#D3D3D3", "#FFFFFF") ,
-                        levels = c(0, 1), na.color = "#808080" )
-    
-    # Create color palette
+    # Create color palette for Debtindicator
     pal <- colorFactor(c(nT.Analyse, n.kritisch, l.kritisch, kritisch, s.kritisch
     ), levels = c(-1, 0, 1, 2, 3), na.color = "#808080" )
     
+    # Create color palette for riskfactor
+    palit <- colorFactor(c("#FFFFFF", "#3D36C7"), levels = c(0, 1 ), na.color = "#808080" )
+
     # Create text shown when mouse glides over countries
     mytext <- paste0(
       "<b>", map@data$country, "</b>","<br/>",
@@ -314,7 +268,7 @@ server <- function(input, output) {
     map_ll <- spTransform(map, CRS("+init=epsg:4326"))
     # Create Map
     l <- leafletProxy("map1", data = map_ll) %>%
-      clearShapes() %>% #clearMarkers() %>%
+      clearShapes() %>% 
       addPolygons(
         fillColor = ~pal(variableplot),
         color = "black",
@@ -334,26 +288,25 @@ server <- function(input, output) {
       # Make legend
       leaflet::addLegend(position = "bottomright",
                          # Specify colors manually b/c pal function does not show colors in legend
-                         colors = c(s.kritisch, kritisch,  l.kritisch, n.kritisch, k.Daten, nT.Analyse ), 
+                         colors = c(s.kritisch, kritisch,  l.kritisch, n.kritisch, k.Daten, nT.Analyse, risk.fact ), 
                          #values = c("sehr kritisch", "kritisch", "leicht kritisch",
                          #           "nicht kritisch", "keine Daten vorhanden", "Nicht Teil der Betrachtung"),
                          #na.label = "keine Daten vorhanden",
                          opacity = 0.7, title = "Verschuldungssituation",
                          labels = c("sehr kritisch", "kritisch", "leicht kritisch",
-                                    "nicht kritisch", "keine Daten vorhanden", "Nicht Teil der Betrachtung") 
-      ) #%>%
-      # addPolygons( 
-      #   fillColor = ~pali(Lineplot),
-      #   color = "white",
-      #   dashArray = "3",#,
-      #   # weight = 0.1, 
-      #   # smoothFactor = 0.5,
-      #   # opacity = 0.7,
-      #   fillOpacity = 0
-      # )
-      # 
-    
-    
+                                    "nicht kritisch", "keine Daten vorhanden", "Nicht Teil der Betrachtung", "Risikofaktor trifft zu") 
+      ) %>%
+      removeShape("Risk") %>%
+      addPolygons(
+        fillColor = ~palit(riskplot),
+        color = "black",
+        #dashArray = "1",
+        weight = 0.1, 
+        smoothFactor = 0.5,
+        #opacity = 0.7,
+        fillOpacity = 0.5,
+        group = "Risk"
+      )
     
     proxy <- leafletProxy(mapId = "map1", data = trend_data) %>%
       clearMarkers()
@@ -372,37 +325,9 @@ server <- function(input, output) {
                             label = pay_data$NAME
       )
     }
-  })
-  # observe({
-  # 
-  #   #datafiltered <- filteredData()
-  # 
-  #   # match selected rows in data with spacial data
-  #   #ordercounties <- match(map@data$ISO3, datafiltered$ISO3)
-  #   #map@data <- datafiltered[ordercounties, ]
-  # 
-  #   # Select indicators for polygons
-  #   #map$riskvar <- map@data[, input$var_risiko]
-  # 
-  #   #map_ll <- spTransform(map, CRS("+init=epsg:4326"))
-  # 
-  #   l <- leafletProxy() %>%
-  #     addPolylines()
-  # 
-  # })
-  
-}
 
+  })
+}
 # shinyApp
 shinyApp(ui = ui, server = server)
 # runApp('./app.R')
-# show log file
-shiny::reactlogShow()
-
-################# USeful Codewaste:
-# c("Land mit geringem Einkommen", "Land mit mittlerem Einkommen im unteren Bereich", "Land mit mittlerem Einkommen im oberen Bereich", 
-#   "Land mit hohem Einkommen oder ohne Angaben"),
-# clearMarkers() %>%
-#   if (input$markers) {
-#     addMarkers(lat = map@data$LAT, lng = map@data$LON, icon = ~PfeilIcons[data$trend_new], label = map@data$NAME) #~PfeilIcons[map@data$trend_new]
-#   } 

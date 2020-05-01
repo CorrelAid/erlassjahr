@@ -205,8 +205,10 @@ sr20_erlassjahr$debt_sit_cat2 <-
     )
   )
 
+sr20_erlassjahr$debt_sit_cat2 <- ifelse(sr20_erlassjahr$oecd == 1, -1, sr20_erlassjahr$debt_sit_cat2)
+
 sr20_erlassjahr$debt_sit_cat <- factor(sr20_erlassjahr$debt_sit_cat2)
-levels(sr20_erlassjahr$debt_sit_cat) <- c("nicht kritisch", "leicht kritisch", "kritisch", "sehr kritisch")
+levels(sr20_erlassjahr$debt_sit_cat) <- c("nicht Teil der Betrachtung", "nicht kritisch", "leicht kritisch", "kritisch", "sehr kritisch")
 
 ################
 ## Indicators ##
