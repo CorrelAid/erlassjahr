@@ -141,7 +141,7 @@ ui <- fluidPage(
                     `Extraktivismus` = "extractivism", 
                     `politische und soziale Fragilität` = "fragility", 
                     `Schuldenstruktur` = "debt_prob", 
-                    `Naturkathastrophen / Klimawandel` = "vulnerability",
+                    `Naturkatastrophen / Klimawandel` = "vulnerability",
                     selected = NULL
                   )
       ),
