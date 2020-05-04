@@ -14,26 +14,22 @@
 ##--------------------------------------------------##
 ## Prerequisits                                     ##
 ##--------------------------------------------------##
-install.packages("pacman")
-pacman::p_load(
-  reactlog,
-  shiny,
-  DT,
-  rgdal,
-  leaflet,
-  maps,
-  dplyr,
-  english,
-  plyr,
-  tidyverse,
-  tidylog,
-  readxl,
-  countrycode,
-  magrittr,
-  zoo,
-  english,
-  modules
-) 
+library(reactlog)
+library(shiny)
+library(DT)
+library(rgdal)
+library(leaflet)
+library(maps)
+library(dplyr)
+library(english)
+library(plyr)
+library(tidyverse)
+library(tidylog)
+library(readxl)
+library(countrycode)
+library(magrittr)
+library(zoo)
+library(modules)
 
 # IMplement modules for cleaning code:
 m <- modules::use("graphics.R")

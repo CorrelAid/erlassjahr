@@ -14,7 +14,8 @@
 ##--------------------------------------------------##
 ## Prerequisits                                     ##
 ##--------------------------------------------------##
-install.packages("pacman")
+#install.packages("pacman")
+library(pacman)
 pacman::p_load(
   reactlog,
   shiny,
