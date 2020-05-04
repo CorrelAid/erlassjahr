@@ -39,10 +39,15 @@ sr_df %<>%
 indicator_names <-
   c(
     "oeffentliche_schulden_bip",
+    "trend_oe_schulden_bip",
     "oeffentliche_schulden_staatseinnahmen",
+    "trend_oe_schulden_staat",
     "auslandsschulden_bip",
+    "trend_ausl_bip",
     "auslandsschuldenstand_exporteinnahmen",
+    "trend_aus_schuldenstand_export",
     "auslandsschuldendienst_exporteinnahmen",
+    "trend_ausl_schuldendienst_export",
     "iwf_einschaetzung",
     "extraktivismus",
     "fragilitaet",
