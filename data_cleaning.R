@@ -266,6 +266,53 @@ sr20_erlassjahr$fragility <- risk_new(sr20_erlassjahr$fragility)
 sr20_erlassjahr$debt_prob <- risk_new(sr20_erlassjahr$debt_prob)
 sr20_erlassjahr$vulnerability <- risk_new(sr20_erlassjahr$vulnerability)
 
+###################################
+## Add Links to Country Profiles ##
+###################################
+
+# add link variable for country profiles
+sr20_erlassjahr <- sr20_erlassjahr %>% 
+  mutate(country_prep = gsub(" und | ", "-", tolower(country))) %>% 
+  mutate(country_prep2 = stringi::stri_replace_all_fixed(country_prep, c("ä", "ü", "ö", "ß"), c("ae", "ue", "oe", "ss"), vectorize_all=FALSE))  %>% 
+  mutate(link = ifelse(!is.na(region), paste0("https://erlassjahr.de/laenderinfos/", country_prep2, "/"), NA)) %>% 
+  select(-country_prep, -country_prep2)
+
+# manually change ambibuous links
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "BIH", "https://erlassjahr.de/laenderinfos/bosnien-herzigowina/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "COD", "https://erlassjahr.de/laenderinfos/kongo-d-r/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "COG", "https://erlassjahr.de/laenderinfos/republik-kongo/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "LAO", "https://erlassjahr.de/laenderinfos/laos/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "LCA", "https://erlassjahr.de/laenderinfos/st-lucia/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "MDA", "https://erlassjahr.de/laenderinfos/moldau/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "VCT", "https://erlassjahr.de/laenderinfos/st-vincent/",sr20_erlassjahr$link)
+
+# manually drop those that don't have a country profile but appear in the sample
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "NRU", NA, sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "OMN", NA, sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "SGP", NA, sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "TKM", NA, sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "TWM", NA, sr20_erlassjahr$link)
+
+# manually add country links for profiles
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "DZA", "https://erlassjahr.de/laenderinfos/algerien/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "GNQ", "https://erlassjahr.de/laenderinfos/aequatorialguinea/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "BWA", "https://erlassjahr.de/laenderinfos/aserbaidschan/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "FJI", "https://erlassjahr.de/laenderinfos/fidschi/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "IRQ", "https://erlassjahr.de/laenderinfos/irak/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "RKS", "https://erlassjahr.de/laenderinfos/kosovo/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "LSO", "https://erlassjahr.de/laenderinfos/lesotho/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "NPL", "https://erlassjahr.de/laenderinfos/nepal/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "PHL", "https://erlassjahr.de/laenderinfos/philippinen/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "SLB", "https://erlassjahr.de/laenderinfos/salomonen/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "WSM", "https://erlassjahr.de/laenderinfos/samoa/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "SOM", "https://erlassjahr.de/laenderinfos/somalia/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "SWZ", "https://erlassjahr.de/laenderinfos/swasiland/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "SYR", "https://erlassjahr.de/laenderinfos/syrien/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "THA", "https://erlassjahr.de/laenderinfos/thailand/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "TLS", "https://erlassjahr.de/laenderinfos/ost-timor/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "TTO", "https://erlassjahr.de/laenderinfos/trinidad-tobago/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "UZB", "https://erlassjahr.de/laenderinfos/usbekistan/",sr20_erlassjahr$link)
+
 ##------------------##
 ## Save the Dataset ##
 ##------------------##
