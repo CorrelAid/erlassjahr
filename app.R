@@ -36,6 +36,10 @@ pacman::p_load(
   modules
 ) 
 
+FindColNumber <- function(df,input){
+  as.numeric(which(colnames(df)==input))
+}
+
 # IMplement modules for cleaning code:
 m <- modules::use("graphics.R")
 FeuerIcons <- m$FeuerIcons()
@@ -56,17 +60,6 @@ map <- readOGR(dsn=path.expand(shape_path),
 load("sr20_erlassjahr.RData")
 data <- sr20_erlassjahr
 data[data==""]<-NA
-
-# data$country[c(9, 10)]  <- c("Australia", "Austria")
-# data$debt_sit_cat2[c(9, 10)] <- c(-1, -1)
-# 
-# levels(data$debt_sit_cat)[length(levels(data$debt_sit_cat))+1] <- "nicht Teil der Betrachtung"
-# data$debt_sit_cat[c(9, 10)] <- c("nicht Teil der Betrachtung", "nicht Teil der Betrachtung")
-# 
-# data$public_debt_bip2[c(9, 10)] <- c(-1, -1)
-# levels(data$public_debt_bip)[length(levels(data$public_debt_bip))+1] <- "nicht Teil der Betrachtung"
-# data$public_debt_bip[c(9, 10)] <- c("nicht Teil der Betrachtung", "nicht Teil der Betrachtung")
-# # ... für alle weiteren indikatoren Anpassen
 
 # Combine data:
 map <- sp::merge(map, data, by.x="ISO3", duplicateGeoms=TRUE)
@@ -94,14 +87,24 @@ ui <- fluidPage(
           
           
           leafletOutput(outputId = "map1", height = "100%", width = "100%"))
-      
+          
       ),
     
     # Create movable fixed (absolute) side panel
     absolutePanel(
-      top = 100, left = 10, width = 250, fixed=TRUE,
+      top = 7, left = 10, width = 250, fixed=TRUE,
       draggable = TRUE, height = "auto",
       
+      # Logo Einbettung
+      div(img(src = "erlassjahr_logo_300col_2015.jpg",width="125px", height = "40px"), style="text-align: center;"),
+      #img(src = "erlassjahr-Logo-transparent.eps",width="100%"),
+      HTML(
+        paste(
+          '<br/>',
+          '<br/>',
+          '<br/>'
+        )
+      ),
       # dropdown input selection Debt Indicator
       selectInput(
         inputId = "var_debtindikator",
@@ -138,8 +141,8 @@ ui <- fluidPage(
       # drop down input selection Risikofaktoren
       selectInput("var_risiko", 
                   "Risikofaktoren wählen", 
-                  choices = list(#`Keine` = "None",
-                    `Extraktivismus` = "extractivism", 
+                  choices = list(`Keine Auswahl` = "None",
+                    `Extraktivismus` = "extractivism" , 
                     `politische und soziale Fragilität` = "fragility", 
                     `Schuldenstruktur` = "debt_prob", 
                     `Naturkatastrophen / Klimawandel` = "vulnerability",
@@ -185,18 +188,28 @@ server <- function(input, output) {
   
   # Select Data according to input
   filteredData <- reactive({
-    if (input$var_income == "Alle" & input$var_region == "Alle") {
+    
+    col.risiko <- FindColNumber(map@data, input$var_risiko)
+    
+    if (input$var_income == "Alle" & input$var_region == "Alle" & input$var_risiko == "None") {
       data <- map@data 
-    } else if (input$var_income != "Alle" & input$var_region == "Alle") {
+    } else if (input$var_income != "Alle" & input$var_region == "Alle" & input$var_risiko == "None") {
       data <- subset(map@data, income == input$var_income)
-    } else if (input$var_income == "Alle" & input$var_region != "Alle") {
+    } else if (input$var_income == "Alle" & input$var_region != "Alle" & input$var_risiko == "None") {
       data <- subset(map@data, region == input$var_region) 
-    } else {
+    } else if (input$var_income != "Alle" & input$var_region != "Alle" & input$var_risiko == "None") {
       data <- subset(map@data, region == input$var_region & income == input$var_income)
+    } else if (input$var_income == "Alle" & input$var_region == "Alle" & input$var_risiko != "None") {
+      data <- subset(map@data, map@data[,col.risiko] == 1)
+    } else if (input$var_income != "Alle" & input$var_region == "Alle" & input$var_risiko != "None") {
+      data <- subset(map@data, income == input$var_income & map@data[,col.risiko] == 1)
+    } else if (input$var_income == "Alle" & input$var_region != "Alle" & input$var_risiko != "None") {
+      data <- subset(map@data, region == input$var_region & map@data[,col.risiko] == 1) 
+    } else {
+      data <- subset(map@data, region == input$var_region & income == input$var_income & map@data[,col.risiko] == 1)
     }
     # add regional input when constructed columns with region input
   })
-  #new.data <- data[ which( data$V1 > 2 | data$V2 < 4) , ]
   
   filteredTrend <- reactive({
     if (input$var_debtindikator == "debt_sit_cat2") {
@@ -213,6 +226,17 @@ server <- function(input, output) {
       trend_var <- "trend_edse_new"
     }
   })
+  
+  
+  # definePalet <- reactive({
+  #   if (input$var_risiko == "debt_sit_cat2") {
+  #     pal <- colorFactor(c(nT.Analyse, n.kritisch, l.kritisch, kritisch, s.kritisch
+  #       ), levels = c(-1, 0, 1, 2, 3), na.color = "#808080" )
+  # 
+  #   } else  {
+  #      pal <- colorFactor(c("#FFFFFF", "#3D36C7"), levels = c(0, 1 ), na.color = "#808080" )
+  #   }
+  # })
   
   # create reactive data output
   output$map1 <- renderLeaflet({
@@ -238,7 +262,7 @@ server <- function(input, output) {
     map$variableplot <- map@data[, input$var_debtindikator]
     
     # Select Polygons for Riskfactor
-    map$riskplot <- map@data[, input$var_risiko]
+    #map$riskplot <- map@data[, input$var_risiko]
     
     #Select input for mouseover text
     map$mouseover <- map@data[,gsub('.$', '',input$var_debtindikator)]
@@ -256,10 +280,10 @@ server <- function(input, output) {
     # Create color palette for Debtindicator
     pal <- colorFactor(c(nT.Analyse, n.kritisch, l.kritisch, kritisch, s.kritisch
     ), levels = c(-1, 0, 1, 2, 3), na.color = "#808080" )
-    
-    # Create color palette for riskfactor
-    palit <- colorFactor(c("#FFFFFF", "#3D36C7"), levels = c(0, 1 ), na.color = "#808080" )
 
+    # Create color palette for riskfactor
+    # palit <- definePalet()
+    
     # Create text shown when mouse glides over countries
     mytext <- paste0(
       "<b>", map@data$country, "</b>","<br/>",
@@ -276,8 +300,8 @@ server <- function(input, output) {
         dashArray = "1",
         weight = 0.1, 
         smoothFactor = 0.5,
-        opacity = 0.7,
-        fillOpacity = 0.7,
+        opacity = 1,
+        fillOpacity = 1,
         label = mytext,
         labelOptions = labelOptions(
           style = list("font-weight" = "normal", padding = "3px 8px"),
@@ -285,29 +309,39 @@ server <- function(input, output) {
           direction = "auto"
         )
       ) %>%
+      addPopups( #lat = map_ll@data$LAT, lng = map_ll@data$LON,
+                  popup='<a href="https://www.r-project.org/">R Project</a>'
+      ) %>%
+  
       clearControls() %>%
       # Make legend
       leaflet::addLegend(position = "bottomright",
                          # Specify colors manually b/c pal function does not show colors in legend
-                         colors = c(s.kritisch, kritisch,  l.kritisch, n.kritisch, k.Daten, nT.Analyse, risk.fact ), 
+                         colors = c(s.kritisch, kritisch,  l.kritisch, n.kritisch, k.Daten, nT.Analyse), #, risk.fact ), 
                          #values = c("sehr kritisch", "kritisch", "leicht kritisch",
                          #           "nicht kritisch", "keine Daten vorhanden", "Nicht Teil der Betrachtung"),
                          #na.label = "keine Daten vorhanden",
-                         opacity = 0.7, title = "Verschuldungssituation",
+                         opacity = 1, title = "Verschuldungssituation",
                          labels = c("sehr kritisch", "kritisch", "leicht kritisch",
-                                    "nicht kritisch", "keine Daten vorhanden", "Nicht Teil der Betrachtung", "Risikofaktor trifft zu") 
-      ) %>%
-      removeShape("Risk") %>%
-      addPolygons(
-        fillColor = ~palit(riskplot),
-        color = "black",
-        #dashArray = "1",
-        weight = 0.1, 
-        smoothFactor = 0.5,
-        #opacity = 0.7,
-        fillOpacity = 0.5,
-        group = "Risk"
-      )
+                                    "nicht kritisch", "keine Daten vorhanden", "Nicht Teil der Betrachtung") #, "Risikofaktor trifft zu") 
+      ) #%>%
+      # removeShape("Risk") %>%
+      # addPolygons(
+      #   fillColor = ~palit(riskplot),
+      #   color = "black",
+      #   #dashArray = "1",
+      #   weight = 0.1, 
+      #   smoothFactor = 0.5,
+      #   #opacity = 0.7,
+      #   fillOpacity = 0.5,
+      #   group = "Risk",
+      #   label = mytext,
+      #   labelOptions = labelOptions(
+      #     style = list("font-weight" = "normal", padding = "3px 8px"),
+      #     textsize = "13px",
+      #     direction = "auto"
+      #   )
+      # )
     
     proxy <- leafletProxy(mapId = "map1", data = trend_data) %>%
       clearMarkers()
@@ -331,4 +365,4 @@ server <- function(input, output) {
 }
 # shinyApp
 shinyApp(ui = ui, server = server)
-# runApp('./app.R')
+#runApp('./app.R')
