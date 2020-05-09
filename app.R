@@ -61,6 +61,7 @@ load("sr20_erlassjahr.RData")
 data <- sr20_erlassjahr
 data[data==""]<-NA
 
+data$url <- paste0("<a href='",data$link,"'>",data$ISO3,"</a>")
 # Combine data:
 map <- sp::merge(map, data, by.x="ISO3", duplicateGeoms=TRUE)
 
@@ -96,7 +97,8 @@ ui <- fluidPage(
       draggable = TRUE, height = "auto",
       
       # Logo Einbettung
-      div(img(src = "erlassjahr_logo_300col_2015.jpg",width="125px", height = "40px"), style="text-align: center;"),
+      #tags$a(imageOutput("erlassjahr_logo_300col_2015.jpg"),href="https://www.google.com",width="125px", height = "40px"),
+      div(img(src = "erlassjahr_logo_300col_2015.jpg",width="125px", height = "40px"), style="text-align: center;", href="https://www.google.com"),
       #img(src = "erlassjahr-Logo-transparent.eps",width="100%"),
       HTML(
         paste(
@@ -261,6 +263,10 @@ server <- function(input, output) {
     # Select Polygons for Debtindikator
     map$variableplot <- map@data[, input$var_debtindikator]
     
+    #map url
+    state_popup <- paste0("<a href='", map@data$link,"'>Zum Länderprofil </a>")
+   
+    
     # Select Polygons for Riskfactor
     #map$riskplot <- map@data[, input$var_risiko]
     
@@ -277,6 +283,10 @@ server <- function(input, output) {
     # data für feuersymbole
     pay_data <- map@data[!is.na(map@data$payment_stop),]
     
+    # data für links
+    link_data <- map@data[!is.na(map@data$link),]
+    
+    
     # Create color palette for Debtindicator
     pal <- colorFactor(c(nT.Analyse, n.kritisch, l.kritisch, kritisch, s.kritisch
     ), levels = c(-1, 0, 1, 2, 3), na.color = "#808080" )
@@ -287,7 +297,8 @@ server <- function(input, output) {
     # Create text shown when mouse glides over countries
     mytext <- paste0(
       "<b>", map@data$country, "</b>","<br/>",
-      "Verschuldungssituation in %: ", "<b>", map$mouseover, "</b>" ) %>%
+      "Verschuldungssituation in %: ", "<b>", map$mouseover, "</b>", "<br/>",
+      "Mit Mausklick zum Länderprofil" ) %>%
       lapply(htmltools::HTML)
     # Transform shapefile for poligon input
     map_ll <- spTransform(map, CRS("+init=epsg:4326"))
@@ -307,11 +318,12 @@ server <- function(input, output) {
           style = list("font-weight" = "normal", padding = "3px 8px"),
           textsize = "13px",
           direction = "auto"
-        )
+        ),
+        popup = state_popup
       ) %>%
-      addPopups( #lat = map_ll@data$LAT, lng = map_ll@data$LON,
-                  popup='<a href="https://www.r-project.org/">R Project</a>'
-      ) %>%
+      # addPopups( data = link_data, lat = link_data$LAT, lng = link_data$LON,
+      #             popup= link_data$url
+      # ) %>%
   
       clearControls() %>%
       # Make legend
