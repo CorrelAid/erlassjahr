@@ -98,7 +98,7 @@ ui <- fluidPage(
       
       # Logo Einbettung
       #tags$a(imageOutput("erlassjahr_logo_300col_2015.jpg"),href="https://www.google.com",width="125px", height = "40px"),
-      div(img(src = "erlassjahr_logo_300col_2015.jpg",width="125px", height = "40px"), style="text-align: center;", href="https://www.google.com"),
+      div(img(src = "erlassjahr_logo_300col_2015.svg",width="125px", height = "40px"), style="text-align: center;", href="https://www.google.com"),
       #img(src = "erlassjahr-Logo-transparent.eps",width="100%"),
       HTML(
         paste(

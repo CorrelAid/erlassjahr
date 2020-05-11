@@ -11,7 +11,7 @@
 ##--------------------------------------------------##
 
 
-
+  
 ##--------------------------------------------------##
 ## Prerequisits                                     ##
 ##--------------------------------------------------##
@@ -244,7 +244,7 @@ server <- function(input, output, session) {
     
     leaflet(map, options = leafletOptions(minZoom = 2, maxZoom = 10)) %>%  # 
       addTiles( urlTemplate = 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png'
-      ) %>% addProviderTiles(provider = "CartoDB.PositronNoLabels") %>%
+      ) %>% #addProviderTiles(provider = "CartoDB.PositronNoLabels") %>%
       setView( 0, 0, 2)
     
   })
@@ -303,7 +303,7 @@ server <- function(input, output, session) {
     # Create text shown when mouse glides over countries
     mytext <- paste0(
       "<b>", map@data$country, "</b>","<br/>",
-      "Verschuldungssituation: ", "<b>", map$mouseover, "</b>", "<br/>",
+      "Verschuldungssituation in %: ", "<b>", map$mouseover, "</b>", "<br/>",
       "Mit Mausklick zum Länderprofil" ) %>%
       lapply(htmltools::HTML)
     # Transform shapefile for poligon input
