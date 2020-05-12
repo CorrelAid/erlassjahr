@@ -40,6 +40,16 @@ sr_df %<>%
          vulnerabilitaet_naturkatastrophen = vulnerability,
          zahlungssituation = payment_stop)
 
+# replace feuer_* with numeric indicators
+
+sr_df$zahlungssituation <- ifelse(
+  sr_df$zahlungssituation == "feuer_grau", 1,
+  ifelse(
+    sr_df$zahlungssituation == "feuer_orange", 2,
+    ifelse(sr_df$zahlungssituation == "feuer_rot", 3, NA)
+  )
+)
+
 # add columns for indicators
 indicator_names <-
   c(
@@ -53,12 +63,7 @@ indicator_names <-
     "trend_aus_schuldenstand_export",
     "auslandsschuldendienst_exporteinnahmen",
     "trend_ausl_schuldendienst_export",
-    "iwf_einschaetzung",
-    "extraktivismus",
-    "fragilitaet",
-    "problematische_schuldenstruktur",
-    "vulnerabilitaet_naturkatastrophen",
-    "zahlungssituation"
+    "iwf_einschaetzung"
   )
 # add empty columns to add manually
 sr_df[, indicator_names] <- NA

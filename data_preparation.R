@@ -164,14 +164,14 @@ sr_df$external_debt_service_exp2 <- indicator2_recode(sr_df$external_debt_servic
 ## Risk Situations ##
 #####################
 
-risk_new <- function(var){
-  var <- ifelse(is.na(var), 0, 1)
-}
-
-sr_df$extractivism <- risk_new(sr_df$extractivism)
-sr_df$fragility <- risk_new(sr_df$fragility)
-sr_df$debt_prob <- risk_new(sr_df$debt_prob)
-sr_df$vulnerability <- risk_new(sr_df$vulnerability)
+# risk_new <- function(var){
+#   var <- ifelse(is.na(var), 0, 1)
+# }
+# 
+# sr_df$extractivism <- risk_new(sr_df$extractivism)
+# sr_df$fragility <- risk_new(sr_df$fragility)
+# sr_df$debt_prob <- risk_new(sr_df$debt_prob)
+# sr_df$vulnerability <- risk_new(sr_df$vulnerability)
 
 #######################
 ## Payment Situation ##

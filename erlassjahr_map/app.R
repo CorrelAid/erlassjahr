@@ -229,16 +229,6 @@ server <- function(input, output, session) {
     }
   })
   
-  
-  # definePalet <- reactive({
-  #   if (input$var_risiko == "debt_sit_cat2") {
-  #     pal <- colorFactor(c(nT.Analyse, n.kritisch, l.kritisch, kritisch, s.kritisch
-  #       ), levels = c(-1, 0, 1, 2, 3), na.color = "#808080" )
-  # 
-  #   } else  {
-  #      pal <- colorFactor(c("#FFFFFF", "#3D36C7"), levels = c(0, 1 ), na.color = "#808080" )
-  #   }
-  # })
   # Create Basemap:
   foundation_map <- reactive({
     
@@ -327,9 +317,6 @@ server <- function(input, output, session) {
         ),
         popup = state_popup
       ) %>%
-      # addPopups( data = link_data, lat = link_data$LAT, lng = link_data$LON,
-      #             popup= link_data$url
-      # ) %>%
       
       clearControls() %>%
       # Make legend
@@ -342,24 +329,7 @@ server <- function(input, output, session) {
                          opacity = 1, title = "Verschuldungssituation",
                          labels = c("sehr kritisch", "kritisch", "leicht kritisch",
                                     "nicht kritisch", "keine Daten vorhanden", "Nicht Teil der Betrachtung") #, "Risikofaktor trifft zu") 
-      ) #%>%
-    # removeShape("Risk") %>%
-    # addPolygons(
-    #   fillColor = ~palit(riskplot),
-    #   color = "black",
-    #   #dashArray = "1",
-    #   weight = 0.1, 
-    #   smoothFactor = 0.5,
-    #   #opacity = 0.7,
-    #   fillOpacity = 0.5,
-    #   group = "Risk",
-    #   label = mytext,
-    #   labelOptions = labelOptions(
-    #     style = list("font-weight" = "normal", padding = "3px 8px"),
-    #     textsize = "13px",
-    #     direction = "auto"
-    #   )
-    # )
+      ) 
     
     proxy <- leafletProxy(mapId = "map1", data = trend_data) %>%
       clearMarkers()
