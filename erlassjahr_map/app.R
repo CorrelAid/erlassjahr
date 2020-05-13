@@ -35,6 +35,12 @@ library(mapview)
 library(webshot)
 
 
+# Check for Phantom.js:
+if (!webshot::is_phantomjs_installed()) {
+  webshot::install_phantomjs()
+}
+
+
 FindColNumber <- function(df,input){
   as.numeric(which(colnames(df)==input))
 }
@@ -246,6 +252,9 @@ server <- function(input, output, session) {
     
   })
   
+  
+  map_conf <- reactiveValues()
+  
   # Display colored countries dependent on the output
   observe({
     
@@ -298,6 +307,12 @@ server <- function(input, output, session) {
       lapply(htmltools::HTML)
     # Transform shapefile for poligon input
     map_ll <- spTransform(map, CRS("+init=epsg:4326"))
+    
+    map_conf$map <- map_ll
+    map_conf$pal <- pal 
+    map_conf$trend_data <- trend_data
+    map_conf$pay_data <- pay_data
+    
     # Create Map
     l <- leafletProxy("map1", data = map_ll) %>%
       clearShapes() %>% 
@@ -353,14 +368,60 @@ server <- function(input, output, session) {
   
   user_created_map <- reactive({
     
-    # call the foundational Leaflet map
-    foundation_map() %>%
-      
-      # store the view based on UI
-      setView( lng = input$map_center$lng
-               ,  lat = input$map_center$lat
-               , zoom = input$map_zoom
+    # Appearently, we need to basically recreate the whole thing, as there 
+    # is no obvious way to retrieve the leafletProxy changes and re apply them
+    # to the leaflet widget..
+    
+    # However, a workaround would consist in lot of redundancy, 
+    # and probably long waiting time. But it works :P 
+
+    output_map <- 
+      leaflet(map_conf$map) %>%
+        addTiles( urlTemplate = 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png') %>% 
+        addProviderTiles(provider = "CartoDB.PositronNoLabels") %>% 
+        addPolygons(
+          fillColor    = ~map_conf$pal(variableplot),
+          color        = "black",
+          dashArray    = "1",
+          weight       = 0.1, 
+          smoothFactor = 0.5,
+          opacity      = 1,
+          fillOpacity  = 1
+        ) %>%
+        clearControls() %>%
+        leaflet::addLegend(
+          position = "bottomright",
+          colors   = c(s.kritisch, kritisch,  l.kritisch, n.kritisch, k.Daten, nT.Analyse), #, risk.fact ), 
+          opacity  = 1, title = "Verschuldungssituation",
+          labels   = c("sehr kritisch", "kritisch", "leicht kritisch",
+                      "nicht kritisch", "keine Daten vorhanden", "Nicht Teil der Betrachtung") #, "Risikofaktor trifft zu") 
+        )  %>%
+        setView(
+          lng  = input$map1_center$lng,
+          lat  = input$map1_center$lat, 
+          zoom = input$map1_zoom
+        ) 
+    
+    if (input$var_trend) {
+      output_map <- output_map %>% 
+        addMarkers(
+          lat  = map_conf$trend_data$LAT, 
+          lng  = map_conf$trend_data$LON,
+          icon = ~PfeilIcons[map_conf$trend_data$trendinput]
       )
+    }
+    
+  
+    if (input$var_zahlung) {
+      output_map <- output_map %>% 
+        addMarkers(
+          lat  = map_conf$pay_data$LAT,
+          lng  = map_conf$pay_data$LON,
+          icon = ~FeuerIcons[map_conf$pay_data$payment_stop]
+      )
+    }
+    
+    return(output_map)
     
   })
   
