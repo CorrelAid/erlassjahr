@@ -35,6 +35,12 @@ library(mapview)
 library(webshot)
 
 
+# Check for Phantom.js:
+if (!webshot::is_phantomjs_installed()) {
+  webshot::install_phantomjs()
+}
+
+
 FindColNumber <- function(df,input){
   as.numeric(which(colnames(df)==input))
 }
