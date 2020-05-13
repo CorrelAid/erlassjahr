@@ -45,7 +45,7 @@ FindColNumber <- function(df,input){
   as.numeric(which(colnames(df)==input))
 }
 
-# IMplement modules for cleaning code:
+# Implement modules for cleaning code:
 m <- modules::use("graphics.R")
 FeuerIcons <- m$FeuerIcons()
 PfeilIcons <- m$PfeilIcons()
@@ -427,7 +427,7 @@ server <- function(input, output, session) {
   
   output$dl <- downloadHandler(
     filename = paste0( Sys.Date()
-                       , "_customLeafletmap"
+                       , "_erlassjahr_custom_map"
                        , ".pdf"
     )
     
