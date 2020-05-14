@@ -111,6 +111,32 @@ sr_df$link <- ifelse(sr_df$ISO3 == "TLS", "https://erlassjahr.de/laenderinfos/os
 sr_df$link <- ifelse(sr_df$ISO3 == "TTO", "https://erlassjahr.de/laenderinfos/trinidad-tobago/",sr_df$link)
 sr_df$link <- ifelse(sr_df$ISO3 == "UZB", "https://erlassjahr.de/laenderinfos/usbekistan/",sr_df$link)
 
+#######################
+##WB Input           ##
+#######################
+
+# getter function
+WB_input <- function (year, countries){
+  library(WDI)
+  dataSeries = c("DT.DOD.DECT.GN.ZS", "DT.DOD.DECT.EX.ZS", "DT.TDS.DECT.EX.ZS")
+  data = WDI(indicator=dataSeries, country=countries, start=year, end=year)
+  return(data);
+}
+# getting the data
+countries <- sr_df %>% 
+  filter(oecd == 0 & keine_daten==0) %>% 
+  pull(ISO3)
+raw_indicators <- WB_input(2018 ,countries)
+
+#merging the data
+raw_indicators$iso2c <-  countrycode::countrycode(raw_indicators$iso2c, 
+                         "iso2c", "iso3c")
+sr_df <- merge(sr_df, raw_indicators, by.x="ISO3", by.y="iso2c")
+sr_df$oeffentliche_schulden_staatseinnahmen <- sr_df$DT.DOD.DECT.GN.ZS
+sr_df$auslandsschuldenstand_exporteinnahmen <- sr_df$DT.DOD.DECT.EX.ZS
+sr_df$auslandsschuldendienst_exporteinnahmen <- sr_df$DT.TDS.DECT.EX.ZS
+#deleting the helping colums 
+sr_df <- subset(sr_df, select = -c(DT.DOD.DECT.GN.ZS,DT.DOD.DECT.EX.ZS,DT.TDS.DECT.EX.ZS))
 ##------------------##
 ## Export Dataframe ##
 ##------------------##
