@@ -65,6 +65,7 @@ indicator_names <-
     "auslandsschuldenstand_exporteinnahmen_indicator",
     "trend_aus_schuldenstand_export",
     "auslandsschuldendienst_exporteinnahmen",
+    "auslandsschuldendienst_exporteinnahmen_indicator",
     "trend_ausl_schuldendienst_export",
     "iwf_einschaetzung"
   )
