@@ -56,12 +56,16 @@ indicator_names <-
     "oeffentliche_schulden_bip",
     "trend_oe_schulden_bip",
     "oeffentliche_schulden_staatseinnahmen",
+    "oeffentliche_schulden_staatseinnahmen_indicator",
     "trend_oe_schulden_staat",
     "auslandsschulden_bip",
+    "auslandsschulden_bip_indicator",
     "trend_ausl_bip",
     "auslandsschuldenstand_exporteinnahmen",
+    "auslandsschuldenstand_exporteinnahmen_indicator",
     "trend_aus_schuldenstand_export",
     "auslandsschuldendienst_exporteinnahmen",
+    "auslandsschuldendienst_exporteinnahmen_indicator",
     "trend_ausl_schuldendienst_export",
     "iwf_einschaetzung"
   )
@@ -137,6 +141,27 @@ sr_df$auslandsschuldenstand_exporteinnahmen <- sr_df$DT.DOD.DECT.EX.ZS
 sr_df$auslandsschuldendienst_exporteinnahmen <- sr_df$DT.TDS.DECT.EX.ZS
 #deleting the helping colums 
 sr_df <- subset(sr_df, select = -c(DT.DOD.DECT.GN.ZS,DT.DOD.DECT.EX.ZS,DT.TDS.DECT.EX.ZS))
+
+###########################
+##Coding into Indicators ##
+###########################
+sr_df$oeffentliche_schulden_staatseinnahmen_indicator <- 
+  ifelse(sr_df$oeffentliche_schulden_staatseinnahmen < 200, 0,
+  ifelse(sr_df$oeffentliche_schulden_staatseinnahmen < 300, 1,
+  ifelse(sr_df$oeffentliche_schulden_staatseinnahmen<=400, 2, 3)))
+sr_df$auslandsschuldenstand_exporteinnahmen_indicator <- 
+  ifelse(sr_df$auslandsschuldenstand_exporteinnahmen < 150, 0,
+  ifelse(sr_df$auslandsschuldenstand_exporteinnahmen <=225, 1,
+  ifelse(sr_df$auslandsschuldenstand_exporteinnahmen <=300, 2,3)))
+sr_df$auslandsschulden_bip_indicator <- 
+  ifelse(sr_df$auslandsschulden_bip < 40, 0,
+  ifelse(sr_df$auslandsschulden_bip < 60, 1,
+  ifelse(sr_df$auslandsschulden_bip <= 80, 2, 3)))
+sr_df$auslandsschuldendienst_exporteinnahmen_indicator <- 
+  ifelse(sr_df$auslandsschuldendienst_exporteinnahmen<15, 0,
+  ifelse(sr_df$auslandsschuldendienst_exporteinnahmen<22.5, 1,
+  ifelse(sr_df$auslandsschuldendienst_exporteinnahmen<=30,2,3)))
+
 ##------------------##
 ## Export Dataframe ##
 ##------------------##
