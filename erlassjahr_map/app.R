@@ -115,7 +115,7 @@ ui <- fluidPage(
       # dropdown input selection Debt Indicator
       selectInput(
         inputId = "var_debtindikator",
-        label = "Schuldenindikator Wählen",
+        label = "Schuldenindikator wählen",
         choices =  list(`Aggregierte Indikatoren` = "debt_sit_cat2",
                         `Öffentliche Schulden / BIP` = "public_debt_bip2", 
                         `Öffentliche Schulden / Staatseinnahmen` = "public_debt_state_rev2", 
@@ -130,8 +130,8 @@ ui <- fluidPage(
                   "Einkommenskategorie wählen",
                   choices =  list(`Alle` = "Alle",
                                   `geringes Einkommen` = "l",
-                                  `mittleres Einkommen, unterer Teil` = "lm", 
-                                  `mittleres Einkommen, oberer Teil` = "um",
+                                  `niedriges mittleres Einkommen` = "lm", 
+                                  `höheres mittleres Einkommen` = "um",
                                   `hohes Einkommen` = "h")
       ),
       # drop down input selection Region
@@ -337,13 +337,10 @@ server <- function(input, output, session) {
       # Make legend
       leaflet::addLegend(position = "bottomright",
                          # Specify colors manually b/c pal function does not show colors in legend
-                         colors = c(s.kritisch, kritisch,  l.kritisch, n.kritisch, k.Daten, nT.Analyse), #, risk.fact ), 
-                         #values = c("sehr kritisch", "kritisch", "leicht kritisch",
-                         #           "nicht kritisch", "keine Daten vorhanden", "Nicht Teil der Betrachtung"),
-                         #na.label = "keine Daten vorhanden",
+                         colors = c(s.kritisch, kritisch,  l.kritisch, n.kritisch, k.Daten, nT.Analyse), #, risk.fact )
                          opacity = 1, title = "Verschuldungssituation",
                          labels = c("sehr kritisch", "kritisch", "leicht kritisch",
-                                    "nicht kritisch", "keine Daten vorhanden", "Nicht Teil der Betrachtung") #, "Risikofaktor trifft zu") 
+                                    "nicht kritisch", "keine Daten vorhanden", "nicht Teil der Betrachtung") #, "Risikofaktor trifft zu") 
       ) 
     
     proxy <- leafletProxy(mapId = "map1", data = trend_data) %>%
@@ -394,7 +391,7 @@ server <- function(input, output, session) {
           colors   = c(s.kritisch, kritisch,  l.kritisch, n.kritisch, k.Daten, nT.Analyse), #, risk.fact ), 
           opacity  = 1, title = "Verschuldungssituation",
           labels   = c("sehr kritisch", "kritisch", "leicht kritisch",
-                      "nicht kritisch", "keine Daten vorhanden", "Nicht Teil der Betrachtung") #, "Risikofaktor trifft zu") 
+                      "nicht kritisch", "keine Daten vorhanden", "nicht Teil der Betrachtung") #, "Risikofaktor trifft zu") 
         )  %>%
         setView(
           lng  = input$map1_center$lng,
