@@ -93,12 +93,12 @@ sr20_erlassjahr <- sr20_erlassjahr[!is.na(sr20_erlassjahr$ISO3), ]
 names(country_all)[1:4] <- c("ISO3","not_critical", "oecd", "no_data")
 country_all <- as.data.frame(country_all)
 
-additional_countries <- data.frame(ISO3 = c("Nordkorea", "Kuba", "Antarktis", "Grönland", "Französisch Guiana"),not_critical = c(NA,NA,NA,NA,NA), oecd = c(NA, NA, NA, NA, NA), no_data = c(1,1,NA,NA,NA))
+additional_countries <- data.frame(ISO3 = c("Nordkorea", "Kuba", "Antarktis", "Grönland", "Französisch Guiana", "Westsahara"),not_critical = c(NA,NA,NA,NA,NA,NA), oecd = c(NA, NA, NA, NA, NA, NA), no_data = c(1,1,NA,NA,NA, NA))
 additional_countries$ISO3 <- as.character(additional_countries$ISO3)
 country_all <- rbind(country_all, additional_countries)
 
 # Convert country names (from English to ISO3)
-custom_match2 <- c("Eswatini" = "SWZ", "Kosovo" = "RKS", "Micronesia" = "FSM", "S†o Tom_ and PrÍncipe" = "STP", "Nordkorea" = "PRK", "Kuba" = "CUB", "Antarktis" = "ATA", "Grönland" = "GRL", "Französisch Guiana" = "GUF")
+custom_match2 <- c("Eswatini" = "SWZ", "Kosovo" = "RKS", "Micronesia" = "FSM", "S†o Tom_ and PrÍncipe" = "STP", "Nordkorea" = "PRK", "Kuba" = "CUB", "Antarktis" = "ATA", "Grönland" = "GRL", "Französisch Guiana" = "GUF", "Westsahara" = "ESH")
 country_all$ISO3 <- countrycode::countrycode(country_all$ISO3, 
                                                        "country.name", "iso3c", custom_match = custom_match2)
 
@@ -213,6 +213,7 @@ sr20_erlassjahr$debt_sit_cat2 <- ifelse(sr20_erlassjahr$not_critical == 1, 0, sr
 sr20_erlassjahr$debt_sit_cat2 <- ifelse(sr20_erlassjahr$ISO3 == "ATA", -1, sr20_erlassjahr$debt_sit_cat2)
 sr20_erlassjahr$debt_sit_cat2 <- ifelse(sr20_erlassjahr$ISO3 == "GRL", -1, sr20_erlassjahr$debt_sit_cat2)
 sr20_erlassjahr$debt_sit_cat2 <- ifelse(sr20_erlassjahr$ISO3 == "GUF", -1, sr20_erlassjahr$debt_sit_cat2)
+sr20_erlassjahr$debt_sit_cat2 <- ifelse(sr20_erlassjahr$ISO3 == "ESH", -1, sr20_erlassjahr$debt_sit_cat2)
 
 sr20_erlassjahr$debt_sit_cat <- factor(sr20_erlassjahr$debt_sit_cat2)
 levels(sr20_erlassjahr$debt_sit_cat) <- c("nicht Teil der Betrachtung", "nicht kritisch", "leicht kritisch", "kritisch", "sehr kritisch")
