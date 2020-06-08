@@ -301,9 +301,14 @@ sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "TKM", NA, sr20_erlassjah
 sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "TWM", NA, sr20_erlassjahr$link)
 
 # manually add country links for profiles
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "AZE", "https://erlassjahr.de/laenderinfos/aserbaidschan/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "CHN", "https://erlassjahr.de/laenderinfos/china/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "CIV", "https://erlassjahr.de/laenderinfos/cote-divoire/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "MKD", "https://erlassjahr.de/laenderinfos/mazedonien/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "STP", "https://erlassjahr.de/laenderinfos/sao-tome-principe/",sr20_erlassjahr$link)
 sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "DZA", "https://erlassjahr.de/laenderinfos/algerien/",sr20_erlassjahr$link)
 sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "GNQ", "https://erlassjahr.de/laenderinfos/aequatorialguinea/",sr20_erlassjahr$link)
-sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "BWA", "https://erlassjahr.de/laenderinfos/aserbaidschan/",sr20_erlassjahr$link)
+sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "BWA", "https://erlassjahr.de/laenderinfos/botswana/",sr20_erlassjahr$link)
 sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "FJI", "https://erlassjahr.de/laenderinfos/fidschi/",sr20_erlassjahr$link)
 sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "IRQ", "https://erlassjahr.de/laenderinfos/irak/",sr20_erlassjahr$link)
 sr20_erlassjahr$link <- ifelse(sr20_erlassjahr$ISO3 == "RKS", "https://erlassjahr.de/laenderinfos/kosovo/",sr20_erlassjahr$link)
