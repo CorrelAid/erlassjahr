@@ -13,6 +13,7 @@ library(magrittr)
 library(countrycode)
 library(dplyr)
 library(writexl)
+library(WDI)
 
 ## Load the main data that was used for the initial map to build template
 load("sr20_erlassjahr.RData")

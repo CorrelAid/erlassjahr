@@ -27,7 +27,7 @@ sr20_erlassjahr <- sr20_erlassjahr[1:129,1:22] # keep only relevant variables an
 
 ##---- Total Countries ----##
 country_all <- read_xlsx("SR20 Überblickstabelle-191107.xlsx", sheet =  7)
-country_all <- country_all[1:194,c(1,4,5)]
+country_all <- country_all[1:194,c(1,3,4,5)]
 
 ##---- Risk Overview ----##
 risks_overview <- read_xlsx("Risiken-Überblick.xlsx")
@@ -75,7 +75,7 @@ sr20_erlassjahr$trend <- as.numeric(sr20_erlassjahr$trend)
 sr20_erlassjahr$country <- gsub("\\*", "", sr20_erlassjahr$country)
 
 # Convert country names (from German to ISO3)
-custom_match <- c("Moldawien" = "MDA")
+custom_match <- c("Moldawien" = "MDA", "Weißrussland" = "BLR")
 sr20_erlassjahr$ISO3 <- countrycode::countrycode(sr20_erlassjahr$country, 
                                                  "country.name.de", "iso3c", custom_match = custom_match)
 
@@ -90,15 +90,15 @@ sr20_erlassjahr <- sr20_erlassjahr[!is.na(sr20_erlassjahr$ISO3), ]
 ##---- Total Countries ----##
 
 # Rename country name variable & add missing countries
-names(country_all)[1:3] <- c("ISO3", "oecd", "no_data")
+names(country_all)[1:4] <- c("ISO3","not_critical", "oecd", "no_data")
 country_all <- as.data.frame(country_all)
 
-additional_countries <- data.frame(ISO3 = c("Nordkorea", "Kuba", "Antarktis", "Grönland"), oecd = c(NA, NA, NA, NA), no_data = c(1,1,1,1))
+additional_countries <- data.frame(ISO3 = c("Nordkorea", "Kuba", "Antarktis", "Grönland", "Französisch Guiana"),not_critical = c(NA,NA,NA,NA,NA), oecd = c(NA, NA, NA, NA, NA), no_data = c(1,1,NA,NA,NA))
 additional_countries$ISO3 <- as.character(additional_countries$ISO3)
 country_all <- rbind(country_all, additional_countries)
 
 # Convert country names (from English to ISO3)
-custom_match2 <- c("Eswatini" = "SWZ", "Kosovo" = "RKS", "Micronesia" = "FSM", "S†o Tom_ and PrÍncipe" = "STP", "Nordkorea" = "PRK", "Kuba" = "CUB", "Antarktis" = "ATA", "Grönland" = "GRL")
+custom_match2 <- c("Eswatini" = "SWZ", "Kosovo" = "RKS", "Micronesia" = "FSM", "S†o Tom_ and PrÍncipe" = "STP", "Nordkorea" = "PRK", "Kuba" = "CUB", "Antarktis" = "ATA", "Grönland" = "GRL", "Französisch Guiana" = "GUF")
 country_all$ISO3 <- countrycode::countrycode(country_all$ISO3, 
                                                        "country.name", "iso3c", custom_match = custom_match2)
 
@@ -206,10 +206,13 @@ sr20_erlassjahr$debt_sit_cat2 <-
   )
 
 sr20_erlassjahr$debt_sit_cat2 <- ifelse(sr20_erlassjahr$oecd == 1, -1, sr20_erlassjahr$debt_sit_cat2)
+sr20_erlassjahr$debt_sit_cat2 <- ifelse(sr20_erlassjahr$debt_sit_cat2 == 0 & !is.na(sr20_erlassjahr$risk_excessive_debt), 1, sr20_erlassjahr$debt_sit_cat2)
+sr20_erlassjahr$debt_sit_cat2 <- ifelse(sr20_erlassjahr$not_critical == 1, 0, sr20_erlassjahr$debt_sit_cat2)
 
 # hand code GRL and ATA
 sr20_erlassjahr$debt_sit_cat2 <- ifelse(sr20_erlassjahr$ISO3 == "ATA", -1, sr20_erlassjahr$debt_sit_cat2)
 sr20_erlassjahr$debt_sit_cat2 <- ifelse(sr20_erlassjahr$ISO3 == "GRL", -1, sr20_erlassjahr$debt_sit_cat2)
+sr20_erlassjahr$debt_sit_cat2 <- ifelse(sr20_erlassjahr$ISO3 == "GUF", -1, sr20_erlassjahr$debt_sit_cat2)
 
 sr20_erlassjahr$debt_sit_cat <- factor(sr20_erlassjahr$debt_sit_cat2)
 levels(sr20_erlassjahr$debt_sit_cat) <- c("nicht Teil der Betrachtung", "nicht kritisch", "leicht kritisch", "kritisch", "sehr kritisch")
@@ -330,3 +333,4 @@ sr20_erlassjahr$country <- countrycode::countrycode(sr20_erlassjahr$ISO3,
 ##------------------##
 
 save(sr20_erlassjahr, file = "sr20_erlassjahr.RData")
+
