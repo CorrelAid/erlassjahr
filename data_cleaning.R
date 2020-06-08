@@ -247,7 +247,7 @@ sr20_erlassjahr$external_debt_service_exp2 <- indicator2_recode(sr20_erlassjahr$
 #######################
 
 payment_high <- c("ERI", "CUB", "PRK", "ZWE", "SOM", "SDN", "SYR")
-payment_med <- c("ARG", "YEM", "GMB", "GRD", "MOZ", "COG", "STP")
+payment_med <- c("ARG", "YEM", "GMB", "GRD", "MOZ", "COG", "STP", "VEN")
 payment_low <- c("IRQ", "KHM", "UKR")
 
 sr20_erlassjahr$payment_stop <-
