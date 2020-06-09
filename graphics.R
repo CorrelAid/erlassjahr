@@ -17,22 +17,23 @@ import(shiny)
 # Make IconList
 PfeilIcons <- function() {
 PfeilIcons <- iconList(
-  minus_one = makeIcon(iconUrl = "pfeil_rot.jpg",
+  minus_one = makeIcon(iconUrl = "RoterPfeil.jpg",
                        iconWidth = 10, iconHeight = 10,
                        iconAnchorX = 0, iconAnchorY = 0),
-  zero = makeIcon(iconUrl = "pfeil_gelb.jpg",
-                  iconWidth = 10, iconHeight = 10,
-                  iconAnchorX = 0, iconAnchorY = 0),
-  one = makeIcon(iconUrl = "pfeil_gruen.jpg",
+  one = makeIcon(iconUrl = "GruenerPfeil.jpg",
                  iconWidth = 10, iconHeight = 10,
-                 iconAnchorX = 0, iconAnchorY = 0)
+                 iconAnchorX = 0, iconAnchorY = 0),
+  zero = makeIcon(iconUrl = "GelberPfeil.jpg",
+                  iconWidth = 10, iconHeight = 10,
+                  iconAnchorX = 0, iconAnchorY = 0)
+
 )
 return(PfeilIcons)
 }
 
 FeuerIcons <- function() {
   FeuerIcons <- iconList(
-  feuer_rot = makeIcon(iconUrl = "feuer_1.jpg",
+  feuer_rot = makeIcon(iconUrl = "feuer_3.jpg",
                        iconWidth = 10, iconHeight = 10,
                        iconAnchorX = -2, iconAnchorY = -2),
   feuer_orange = makeIcon(iconUrl = "feuer_2.jpg",

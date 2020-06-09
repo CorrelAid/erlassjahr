@@ -17,13 +17,13 @@ import(shiny)
 # Make IconList
 PfeilIcons <- function() {
 PfeilIcons <- iconList(
-  minus_one = makeIcon(iconUrl = "pfeil_rot.jpg",
+  minus_one = makeIcon(iconUrl = "pfeil_gruen.jpg",
                        iconWidth = 10, iconHeight = 10,
                        iconAnchorX = 0, iconAnchorY = 0),
   zero = makeIcon(iconUrl = "pfeil_gelb.jpg",
                   iconWidth = 10, iconHeight = 10,
                   iconAnchorX = 0, iconAnchorY = 0),
-  one = makeIcon(iconUrl = "pfeil_gruen.jpg",
+  one = makeIcon(iconUrl = "pfeil_rot.jpg",
                  iconWidth = 10, iconHeight = 10,
                  iconAnchorX = 0, iconAnchorY = 0)
 )
