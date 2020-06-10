@@ -269,7 +269,7 @@ server <- function(input, output, session) {
     map$variableplot <- map@data[, input$var_debtindikator]
     
     #map url
-    state_popup <- paste0("<a href='", map@data$link,"'>Zum Länderprofil </a>")
+    state_popup <- paste0("<a href=\'", map@data$link,"', target=\"_blank\">Zum Länderprofil </a>")
     
     
     # Select Polygons for Riskfactor

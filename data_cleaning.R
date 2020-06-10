@@ -282,7 +282,8 @@ sr20_erlassjahr$vulnerability <- risk_new(sr20_erlassjahr$vulnerability)
 sr20_erlassjahr <- sr20_erlassjahr %>% 
   mutate(country_prep = gsub(" und | ", "-", tolower(country))) %>% 
   mutate(country_prep2 = stringi::stri_replace_all_fixed(country_prep, c("ä", "ü", "ö", "ß"), c("ae", "ue", "oe", "ss"), vectorize_all=FALSE))  %>% 
-  mutate(link = ifelse(!is.na(region), paste0("https://erlassjahr.de/laenderinfos/", country_prep2, "/"), NA)) %>% 
+  mutate(link = paste0("https://erlassjahr.de/laenderinfos/", country_prep2, "/")) %>% 
+  #mutate(link = ifelse(!is.na(region), paste0("https://erlassjahr.de/laenderinfos/", country_prep2, "/"), NA)) %>% 
   select(-country_prep, -country_prep2)
 
 # manually change ambibuous links
