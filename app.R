@@ -52,7 +52,7 @@ PfeilIcons <- m$PfeilIcons()
 shape_path <- "TM_WORLD_BORDERS_SIMPL-0.3.shp"
 encoding <- "UTF-8"
 
-map <- readOGR(dsn=path.expand(shape_path), 
+LonLat <- readOGR(dsn=path.expand(shape_path), 
                layer="TM_WORLD_BORDERS_SIMPL-0.3", 
                encoding = encoding)
 
@@ -63,7 +63,15 @@ data[data==""]<-NA
 
 data$url <- paste0("<a href='",data$link,"'>",data$ISO3,"</a>")
 # Combine data:
-map <- sp::merge(map, data, by.x="ISO3", duplicateGeoms=TRUE)
+map <- sp::merge(LonLat, data, by.x="ISO3", duplicateGeoms=TRUE)
+
+
+data <- rename(data, iso_a3 = ISO3)
+sp_data2 <- rnaturalearth::ne_countries(scale = "large", returnclass = "sp")
+map <- sp::merge(sp_data2, data, by.x="iso_a3", duplicateGeoms=TRUE)
+map@data <- rename(map@data, ISO3 = iso_a3)
+MergeColumns <- LonLat@data[, c("ISO3", "LON", "LAT")]
+map <- sp::merge(map, MergeColumns, by.x="ISO3", duplicateGeoms=TRUE)
 
 
 

@@ -33,7 +33,9 @@ library(zoo)
 library(modules)
 library(mapview)
 library(webshot)
-
+library(rnaturalearth)
+library(rnaturalearthhires)
+library(rnaturalearthdata)
 
 # Check for Phantom.js:
 if (!webshot::is_phantomjs_installed()) {
@@ -57,9 +59,15 @@ PfeilIcons <- m$PfeilIcons()
 shape_path <- "TM_WORLD_BORDERS_SIMPL-0.3.shp"
 encoding <- "UTF-8"
 
-map <- readOGR(dsn=path.expand(shape_path), 
-               layer="TM_WORLD_BORDERS_SIMPL-0.3", 
-               encoding = encoding)
+LonLat <- readOGR(dsn=path.expand(shape_path), 
+                  layer="TM_WORLD_BORDERS_SIMPL-0.3", 
+                  encoding = encoding)
+# Select French-Guiana to merge to shapefile (Missing in ne data)
+Fr.Guiana <- LonLat[LonLat$ISO3 == "GUF",]
+Fr.Guiana@data <- Fr.Guiana@data[c("ISO3", "NAME")]
+Fr.Guiana@data <- rename(Fr.Guiana@data, iso_a3 = ISO3, geounit = NAME)
+# Rename the Polygon ID to 255 to have unique ones
+slot(slot(Fr.Guiana, "polygons")[[1]], "ID") = "255"
 
 # Load Data
 load("sr20_erlassjahr.RData")
@@ -67,9 +75,26 @@ data <- sr20_erlassjahr
 data[data==""]<-NA
 
 data$url <- paste0("<a href='",data$link,"'>",data$ISO3,"</a>")
-# Combine data:
-map <- sp::merge(map, data, by.x="ISO3", duplicateGeoms=TRUE)
 
+# rename colum to match sp file
+data <- rename(data, iso_a3 = ISO3)
+
+# Use naturalearth shapefile
+sp_data2 <- rnaturalearth::ne_countries(scale = "large", returnclass = "sp")
+
+# merge the missing polygon to the sp object
+sp_data2 <- raster::bind(sp_data2,Fr.Guiana)
+
+# add Missing ISO3 Codes
+sp_data2@data[sp_data2@data$geounit == "France", "iso_a3"] <- "FRA"
+sp_data2@data[sp_data2@data$geounit == "Norway", "iso_a3"] <- "NOR"
+sp_data2@data[sp_data2@data$geounit == "Kosovo", "iso_a3"] <- "RKS"
+
+# combine data
+map <- sp::merge(sp_data2, data, by.x="iso_a3", duplicateGeoms=TRUE)
+map@data <- rename(map@data, ISO3 = iso_a3)
+MergeColumns <- LonLat@data[, c("ISO3", "LON", "LAT")]
+map <- sp::merge(map, MergeColumns, by.x="ISO3", duplicateGeoms=TRUE)
 
 
 ##--------------------------------------------------##
@@ -185,7 +210,15 @@ k.Daten <- "#808080"
 nT.Analyse <-  "#F0F2E8"
 hint.grnd <- " #B3F0D4"
 risk.fact <- "#3D36C7"
-# helperfunction to read corrct trend data:
+
+# Choice vector for Mouseover
+choiceVec <-  c("Aggregierte Indikatoren" = "debt_sit_cat2",
+                "Öffentliche Schulden / BIP" = "public_debt_bip2", 
+                "Öffentliche Schulden / Staatseinnahmen" = "public_debt_state_rev2", 
+                "Auslandsschuldenstand / BIP" = "foreign_debt_bip2", 
+                "Auslandsschuldenstand / Exporteinnahmen" = "foreign_debt_exp2", 
+                "Auslandsschuldendienst / Exporteinnahmen" = "external_debt_service_exp2")
+
 
 ##--------------------------------------------------##
 ## Server für Shiny Map                             ##
@@ -235,6 +268,27 @@ server <- function(input, output, session) {
     }
   })
   
+  Legend.Labels <- reactive({
+    if (input$var_debtindikator == "debt_sit_cat2") {
+      legende <- c("sehr kritisch", "kritisch", "leicht kritisch",
+                   "nicht kritisch", "keine Daten vorhanden", "nicht Teil der Betrachtung")
+    } else if (input$var_debtindikator == "public_debt_bip2") {
+      legende <- c("> 100 %", "75% - 100%", "50% - 75%",
+                   "< 50%", "keine Daten vorhanden", "nicht Teil der Betrachtung")
+    } else if (input$var_debtindikator == "public_debt_state_rev2") {
+      legende <- c("> 400 %", "300% - 400%", "200% - 300%",
+                   "< 200%", "keine Daten vorhanden", "nicht Teil der Betrachtung")
+    } else if (input$var_debtindikator == "foreign_debt_bip2") {
+      legende <- c("> 80 %", "60% - 80%", "40% - 60%",
+                   "< 40%", "keine Daten vorhanden", "nicht Teil der Betrachtung")
+    } else if (input$var_debtindikator == "foreign_debt_exp2") {
+      legende <- c("> 300 %", "225% - 300%", "150% - 225%",
+                   "< 150%", "keine Daten vorhanden", "nicht Teil der Betrachtung")
+    } else  {
+      legende <- c("> 30 %", "22,5% - 30%", "15% - 22,5%",
+                   "< 15%", "keine Daten vorhanden", "nicht Teil der Betrachtung")
+      }
+  })
   # Create Basemap:
   foundation_map <- reactive({
     
@@ -296,13 +350,15 @@ server <- function(input, output, session) {
     pal <- colorFactor(c(nT.Analyse, n.kritisch, l.kritisch, kritisch, s.kritisch
     ), levels = c(-1, 0, 1, 2, 3), na.color = "#808080" )
     
+    Llabels <- Legend.Labels()
     # Create color palette for riskfactor
     # palit <- definePalet()
     
     # Create text shown when mouse glides over countries
     mytext <- paste0(
       "<b>", map@data$country, "</b>","<br/>",
-      "Verschuldungssituation: ", "<b>", map$mouseover, "</b>", "<br/>",
+      names(choiceVec)[choiceVec == input$var_debtindikator], ": ", 
+      "<b>", map$mouseover, "</b>", "<br/>",
       "Mit Mausklick zum Länderprofil" ) %>%
       lapply(htmltools::HTML)
     # Transform shapefile for poligon input
@@ -312,6 +368,7 @@ server <- function(input, output, session) {
     map_conf$pal <- pal 
     map_conf$trend_data <- trend_data
     map_conf$pay_data <- pay_data
+    map_conf$Llabels <- Llabels
     
     # Create Map
     l <- leafletProxy("map1", data = map_ll) %>%
@@ -339,8 +396,7 @@ server <- function(input, output, session) {
                          # Specify colors manually b/c pal function does not show colors in legend
                          colors = c(s.kritisch, kritisch,  l.kritisch, n.kritisch, k.Daten, nT.Analyse), #, risk.fact )
                          opacity = 1, title = "Verschuldungssituation",
-                         labels = c("sehr kritisch", "kritisch", "leicht kritisch",
-                                    "nicht kritisch", "keine Daten vorhanden", "nicht Teil der Betrachtung") #, "Risikofaktor trifft zu") 
+                         labels = Llabels
       ) 
     
     proxy <- leafletProxy(mapId = "map1", data = trend_data) %>%
@@ -388,16 +444,15 @@ server <- function(input, output, session) {
         clearControls() %>%
         leaflet::addLegend(
           position = "bottomright",
-          colors   = c(s.kritisch, kritisch,  l.kritisch, n.kritisch, k.Daten, nT.Analyse), #, risk.fact ), 
+          colors   = c(s.kritisch, kritisch,  l.kritisch, n.kritisch, k.Daten, nT.Analyse), #, risk.fact ),
           opacity  = 1, title = "Verschuldungssituation",
-          labels   = c("sehr kritisch", "kritisch", "leicht kritisch",
-                      "nicht kritisch", "keine Daten vorhanden", "nicht Teil der Betrachtung") #, "Risikofaktor trifft zu") 
+          labels   = Llabels
         )  %>%
         setView(
           lng  = input$map1_center$lng,
           lat  = input$map1_center$lat, 
           zoom = input$map1_zoom
-        ) 
+        )
     
     if (input$var_trend) {
       output_map <- output_map %>% 
