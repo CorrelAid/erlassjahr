@@ -81,6 +81,10 @@ data <- rename(data, iso_a3 = ISO3)
 
 # Use naturalearth shapefile
 sp_data2 <- rnaturalearth::ne_countries(scale = "large", returnclass = "sp")
+# take out unnecesary data
+sp_data2@data <- sp_data2@data[c("featurecla", "geounit", "iso_a3")]
+
+
 
 # merge the missing polygon to the sp object
 sp_data2 <- raster::bind(sp_data2,Fr.Guiana)
