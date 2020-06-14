@@ -105,19 +105,25 @@ map <- sp::merge(map, MergeColumns, by.x="ISO3", duplicateGeoms=TRUE)
 ## User Interface Shiny                             ##
 ##--------------------------------------------------##
 
-# Install log file for debugging:
-options(shiny.reactlog=TRUE)
+# CSS code
+# mycss <- "
+# #select ~ .selectize-control .selectize-input {
+#   max-height: 100px;
+#   overflow-y: auto;
+# }
+# "
 
 ui <- fluidPage(
   #titlePanel(title = h1("Erlassjahr app", style = "color:#3474A7", align = "left")),
-  
+  #tags$style(mycss),
   #layout with main area and side bar
   sidebarLayout(
     mainPanel(
       div(class="outer",
           tags$style(type = "text/css", 
                      ".outer {position: fixed; top: 0; 
-                     left: 0; right: 0; bottom: 0; padding: 0}"), # overflow:   hidden;
+                     left: 0; right: 0; bottom: 0; padding: 0}", 
+                     ".selectize-dropdown-content {max-height: 400px; }"), # overflow:   hidden;
           
           
           
@@ -142,7 +148,7 @@ ui <- fluidPage(
         )
       ),
       # dropdown input selection Debt Indicator
-      selectInput(
+      selectizeInput(
         inputId = "var_debtindikator",
         label = "Schuldenindikator wählen",
         choices =  list(`Aggregierte Indikatoren` = "debt_sit_cat2",
