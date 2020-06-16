@@ -32,7 +32,7 @@ return(PfeilIcons)
 
 FeuerIcons <- function() {
   FeuerIcons <- iconList(
-  feuer_rot = makeIcon(iconUrl = "feuer_1.jpg",
+  feuer_rot = makeIcon(iconUrl = "feuer_3.jpg",
                        iconWidth = 10, iconHeight = 10,
                        iconAnchorX = -2, iconAnchorY = -2),
   feuer_orange = makeIcon(iconUrl = "feuer_2.jpg",
