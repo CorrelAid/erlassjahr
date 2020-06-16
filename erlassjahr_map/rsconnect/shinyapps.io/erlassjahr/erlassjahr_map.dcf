@@ -1,0 +1,10 @@
+name: erlassjahr_map
+title:
+username:
+account: erlassjahr
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2460935
+bundleId: 3275456
+url: https://erlassjahr.shinyapps.io/erlassjahr_map/
+when: 1592290024.15708
