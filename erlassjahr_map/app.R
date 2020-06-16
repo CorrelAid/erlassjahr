@@ -456,7 +456,7 @@ server <- function(input, output, session) {
           position = "bottomright",
           colors   = c(s.kritisch, kritisch,  l.kritisch, n.kritisch, k.Daten, nT.Analyse), #, risk.fact ),
           opacity  = 1, title = "Verschuldungssituation",
-          labels   = Llabels
+          labels   = map_conf$Llabels
         )  %>%
         setView(
           lng  = input$map1_center$lng,
