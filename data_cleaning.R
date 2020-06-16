@@ -335,9 +335,14 @@ sr20_erlassjahr$country <- countrycode::countrycode(sr20_erlassjahr$ISO3,
                                                     "iso3c", "country.name.de", custom_match = custom_match3)
 
 
+# Set the five main indicators to 0 for visualization
+sr20_erlassjahr <- sr20_erlassjahr %>% 
+  mutate_at(vars(matches("2")), ~replace(., is.na(.), 0))
+  
 ##------------------##
 ## Save the Dataset ##
 ##------------------##
 
 save(sr20_erlassjahr, file = "sr20_erlassjahr.RData")
+save(sr20_erlassjahr, file = "erlassjahr_map/sr20_erlassjahr.RData")
 
