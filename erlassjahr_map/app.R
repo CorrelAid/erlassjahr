@@ -123,7 +123,19 @@ ui <- fluidPage(
           tags$style(type = "text/css", 
                      ".outer {position: fixed; top: 0; 
                      left: 0; right: 0; bottom: 0; padding: 0}", 
-                     ".selectize-dropdown-content {max-height: 400px; }"), # overflow:   hidden;
+                     ".selectize-dropdown-content {max-height: 100px; }",
+                     ".leaflet-popup-content-wrapper {
+                       background: white;
+                       color: black;
+                         padding: 2px;
+                       border-radius: 0px;
+                       opacity: 0.5;
+                     }",
+                    " .leaflet-popup-tip {
+                       background: red;
+                      opacity: 0;
+                     }"
+                     ), # overflow:   hidden;
           
           
           
@@ -133,20 +145,20 @@ ui <- fluidPage(
     
     # Create movable fixed (absolute) side panel
     absolutePanel(
-      top = 7, left = 10, width = 250, fixed=TRUE,
+      top = 30, left = 45, width = 200, fixed=TRUE,
       draggable = TRUE, height = "auto",
       
       # Logo Einbettung
       #tags$a(imageOutput("erlassjahr_logo_300col_2015.jpg"),href="https://www.google.com",width="125px", height = "40px"),
-      div(img(src = "erlassjahr_logo_300col_2015.svg",width="125px", height = "40px"), style="text-align: center;", href="https://www.google.com"),
+      #div(img(src = "erlassjahr_logo_300col_2015.svg",width="125px", height = "40px"), style="text-align: center;", href="https://www.google.com"),
       #img(src = "erlassjahr-Logo-transparent.eps",width="100%"),
-      HTML(
-        paste(
-          '<br/>',
-          '<br/>',
-          '<br/>'
-        )
-      ),
+      #HTML(
+      # #  paste(
+      #     '<br/>',
+      #     '<br/>',
+      #     '<br/>'
+      #   )
+      # ),
       # dropdown input selection Debt Indicator
       selectizeInput(
         inputId = "var_debtindikator",
@@ -229,6 +241,9 @@ choiceVec <-  c("Aggregierte Indikatoren" = "debt_sit_cat2",
                 "Auslandsschuldenstand / Exporteinnahmen" = "foreign_debt_exp2", 
                 "Auslandsschuldendienst / Exporteinnahmen" = "external_debt_service_exp2")
 
+content <- paste0(sep = "<b>", "Quelle erlassjahr.de", "</b>"
+)
+
 
 ##--------------------------------------------------##
 ## Server für Shiny Map                             ##
@@ -303,9 +318,9 @@ server <- function(input, output, session) {
   foundation_map <- reactive({
     
     leaflet(map, options = leafletOptions(minZoom = 2, maxZoom = 10)) %>%  # 
-      addTiles( urlTemplate = 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png'
+      addTiles(urlTemplate = 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png'
       ) %>% addProviderTiles(provider = "CartoDB.PositronNoLabels") %>%
-      setView( 0, 0, 2)
+      setView( 0, 15, 2)
     
   })
   
@@ -399,7 +414,7 @@ server <- function(input, output, session) {
         ),
         popup = state_popup
       ) %>%
-      
+    
       clearControls() %>%
       # Make legend
       leaflet::addLegend(position = "bottomright",
@@ -407,7 +422,10 @@ server <- function(input, output, session) {
                          colors = c(s.kritisch, kritisch,  l.kritisch, n.kritisch, k.Daten, nT.Analyse), #, risk.fact )
                          opacity = 1, title = "Verschuldungssituation",
                          labels = Llabels
-      ) 
+      ) %>%
+      addPopups(-80, -70, content,
+                options = popupOptions(closeButton = FALSE)
+      )
     
     proxy <- leafletProxy(mapId = "map1", data = trend_data) %>%
       clearMarkers()
