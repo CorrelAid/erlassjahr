@@ -67,6 +67,10 @@ kleine Diskettensymbol oben in der Icon-Leiste klicken.
 ## Schritt 1: Excel-Tabelle erstellen ##
 ## ---------------------------------- ##
 
+          ACHTUNG: Stellt sicher, dass ihr oben das Jahr aktualisiert habt
+          und auf das grüne Dreieck geklickt habt, bevor ihr mit Schritt 1
+          beginnt.
+
 Nachdem ihr das Jahr erfolgreich eingetragen habt, ist der erste Schritt, die Excel-
 Tabelle für ein Schuldenjahr zu erstellen. Wenn das Jahr oben "2021" ist, erstellt euch
 der Code unten eine halb ausgefüllte Excel-Tabelle mit folgenden Informationen:
@@ -99,6 +103,10 @@ Karte mit den Daten umgehen und diese verarbeiten kann.
 ## ------------------------------ ##
 ## Schritt 2: Karte aktualisieren ##
 ## ------------------------------ ##
+
+          ACHTUNG: Stellt sicher, dass ihr oben das Jahr aktualisiert habt
+          und auf das grüne Dreieck geklickt habt, bevor ihr mit Schritt 2
+          beginnt.
 
 Sobald ihr vollständig mit der Bearbeitung der Excel-Tabelle fertig seid, könnt ihr
 in Schritt 2 die Karte online aktualisieren. Hierzu genügt es wieder einzig und allein
