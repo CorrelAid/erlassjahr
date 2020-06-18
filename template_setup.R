@@ -9,11 +9,11 @@
 ## Prerequisits ##
 ##--------------##
 
-library(magrittr)
-library(countrycode)
-library(dplyr)
-library(writexl)
-library(WDI)
+library(magrittr) # A Forward-Pipe Operator for R
+library(countrycode) # Convert Country Names and Country Codes
+library(dplyr) # A Grammar of Data Manipulation
+library(writexl) # Export Data Frames to Excel 'xlsx' Format
+library(WDI) # World Development Indicators (World Bank) # World Development Indicators (World Bank)
 
 ## Load the main data that was used for the initial map to build template
 load("sr20_erlassjahr.RData")
@@ -122,7 +122,7 @@ sr_df$link <- ifelse(sr_df$ISO3 == "UZB", "https://erlassjahr.de/laenderinfos/us
 
 # getter function
 WB_input <- function (year, countries){
-  library(WDI)
+  library(WDI) # World Development Indicators (World Bank) # World Development Indicators (World Bank)
   dataSeries = c("DT.DOD.DECT.GN.ZS", "DT.DOD.DECT.EX.ZS", "DT.TDS.DECT.EX.ZS")
   data = WDI(indicator=dataSeries, country=countries, start=year, end=year)
   return(data);
@@ -168,4 +168,5 @@ sr_df$auslandsschuldendienst_exporteinnahmen_indicator <-
 ##------------------##
 
 writexl::write_xlsx(sr_df, path = "schuldenreport_vorlage.xlsx")
+
 

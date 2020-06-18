@@ -10,12 +10,13 @@
 ##--------------##
 
 # Dependencies 
-library(readxl)
-library(countrycode)
-library(tidyverse)
-library(magrittr)
-library(zoo)
-library(english)
+library(readxl) # Read Excel Files
+library(countrycode) # Convert Country Names and Country Codes
+library(dplyr) # A Grammar of Data Manipulation
+library(purrr) # Functional Programming Tools
+library(magrittr) # A Forward-Pipe Operator for R
+library(zoo) # S3 Infrastructure for Regular and Irregular Time Series (Z's Ordered Observations)
+library(english) # Translate Integers into English
 
 ##-------------##
 ##  Load Data  ##
@@ -223,7 +224,7 @@ levels(sr20_erlassjahr$debt_sit_cat) <- c("nicht Teil der Betrachtung", "nicht k
 ################
 
 indicator_recode <- function(var){
-  var <- ifelse(sr20_erlassjahr$oecd == 1, 0, var)
+  var <- ifelse(sr20_erlassjahr$oecd == 1, NA, var)
 }
 
 sr20_erlassjahr$public_debt_bip <- indicator_recode(sr20_erlassjahr$public_debt_bip)
@@ -345,4 +346,7 @@ sr20_erlassjahr <- sr20_erlassjahr %>%
 
 save(sr20_erlassjahr, file = "sr20_erlassjahr.RData")
 save(sr20_erlassjahr, file = "erlassjahr_map/sr20_erlassjahr.RData")
+
+
+
 

@@ -15,27 +15,25 @@
 ##--------------------------------------------------##
 ## Prerequisits                                     ##
 ##--------------------------------------------------##
-library(reactlog)
-library(shiny)
-library(DT)
-library(rgdal)
-library(leaflet)
-library(maps)
-library(dplyr)
-library(english)
-library(plyr)
-library(tidyverse)
-library(tidylog)
-library(readxl)
-library(countrycode)
-library(magrittr)
-library(zoo)
-library(modules)
-library(mapview)
-library(webshot)
-library(rnaturalearth)
-library(rnaturalearthhires)
-library(rnaturalearthdata)
+library(reactlog) # Reactivity Visualizer for 'shiny'
+library(shiny) # Web Application Framework for R
+library(DT) # A Wrapper of the JavaScript Library 'DataTables'
+library(rgdal) # Bindings for the 'Geospatial' Data Abstraction Library
+library(leaflet) # Create Interactive Web Maps with the JavaScript 'Leaflet' Library
+library(maps) # Draw Geographical Maps
+library(dplyr) # A Grammar of Data Manipulation
+library(english) # Translate Integers into English
+library(plyr) # Tools for Splitting, Applying and Combining Data
+library(readxl) # Read Excel Files
+library(countrycode) # Convert Country Names and Country Codes
+library(magrittr) # A Forward-Pipe Operator for R
+library(zoo) # S3 Infrastructure for Regular and Irregular Time Series (Z's Ordered Observations)
+library(modules) # Self Contained Units of Source Code
+library(mapview) # Interactive Viewing of Spatial Data in R
+library(webshot) # Take Screenshots of Web Pages
+library(rnaturalearth) # World Map Data from Natural Earth
+library(rnaturalearthhires) # High Resolution World Vector Map Data from Natural Earth used in rnaturalearth
+library(rnaturalearthdata) # World Vector Map Data from Natural Earth Used in 'rnaturalearth'
 
 # Check for Phantom.js:
 if (!webshot::is_phantomjs_installed()) {
@@ -523,3 +521,4 @@ server <- function(input, output, session) {
 # shinyApp
 shinyApp(ui = ui, server = server)
 #runApp('./app.R')
+
