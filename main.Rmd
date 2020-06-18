@@ -1,0 +1,120 @@
+---
+title: "Hauptdatei"
+output: html_document
+---
+
+                ## ------------------------------------------------- ##
+                ## Diese Datei ist die einzige, die ihr öffnen müsst ## 
+                ## ------------------------------------------------- ##
+
+
+## --------------- ##
+## Arbeitsschritte ## 
+## --------------- ##
+
+Die Arbeitsschritte um mit dieser Datei zu arbeiten teilt sich auf in 2 Schritte:
+
+  1. Erstelle eine neue Excel-Tabelle
+  2. Aktualisiere die Karte
+
+Erst wenn ihr die Excel-Tabelle aus Schritt 1 vollständig erstellt und gespeichert
+habt, könnt ihr Schritt 2 ausführen. 
+
+        ACHTUNG: Jedes Mal wenn ihr Schritt 1 ausführt wird die Excel-Tabelle
+        aktualisiert und damit überschrieben! Das heißt, Schritt 1 sollte nur
+        1x pro Jahr ausgeführt werden. Händische Anpassungen in der Excel-Tabelle
+        können wie gewohnt über "Speichern" in Excel gesichert werden. 
+        
+Schritt 2 wird erst dann ausgeführt, wenn ihr die Excel-Tabelle vollständig aus-
+gefüllt habt und bereit seid eure Karte online zu aktualisieren.
+
+## ----------------------------------- ##
+## Wie werden die Schritte ausgeführt? ## 
+## ----------------------------------- ##
+
+Um einen Arbeitsschritt auszuführen, müsst ihr einfach auf das grüne Dreieck in
+einem sogenannten code chunk klicken. Ein code chunk ist dadurch gekennzeichnet,
+dass er zwischen ```{r} ``` eingerahmt ist. Es gibt nur ein einziges Feld (code
+chunk), das ihr bearbeiten müsst. Im Feld hier unten seht ihr den code:
+
+          year <- XXXX
+
+Bevor ihr einen Arbeitsschritt ausführt müsst ihr sicherstellen, dass anstatt der
+"XXXX" hier das aktuelle Jahr eurer Karte und eures Schuldenberichts steht. Für
+den Schuldenreport 2021 müsste von daher
+          
+          year <- 2021
+          
+eingetragen werden. Sollte kein Jahr eingetragen sein, bekommt ihr einen Fehler
+und es wird keine Excel-Tabelle erstellt beziehungsweise es wird keine aktualisierte
+Karte erstellt. Nachdem ihr das richtige Jahr eingetragen habt, müsst ihr nur noch
+auf das grüne Dreieck klicken um den Befehl auszuführen. Das wars dann auch schon! :)
+
+```{r}
+year <- XXXX
+```
+
+          ACHTUNG: Das Jahr hier oben zu ändern ist das einzige Mal, dass ihr
+          etwas in diesem Dokument manuell etwas ändern müsst. Für die nachfolgen-
+          den Schritte müsst ihr lediglich auf das grüne Dreieck klicken um die
+          Arbeitsschritte auszuführen.
+          
+Nachdem ihr das Jahr aktualisiert habt, müsst ihr nur noch das Dokument hier speichern.
+Dafür könnt ihr entweder die Tastenkombination (cmd+s) auf dem Mac nutzen oder auf das
+kleine Diskettensymbol oben in der Icon-Leiste klicken.
+
+## ---------------------------------- ##
+## Schritt 1: Excel-Tabelle erstellen ##
+## ---------------------------------- ##
+
+Nachdem ihr das Jahr erfolgreich eingetragen habt, ist der erste Schritt, die Excel-
+Tabelle für ein Schuldenjahr zu erstellen. Wenn das Jahr oben "2021" ist, erstellt euch
+der Code unten eine halb ausgefüllte Excel-Tabelle mit folgenden Informationen:
+
+XXXX
+
+Diese Informationen werden aus 2 Quellen generiert:
+
+  1. Den Schuldenreportdaten vom vorherigen Jahr, sprich, wenn das Jahr 2021 gewählt
+  ist, werden automatisch alle relevanten Daten aus dem Schuldenreport von 2020 über-
+  nommen
+  2. Die Informationen der Weltbank werden - soweit sie verfügbar sind - automatisch
+  von der Website der Weltbank heruntergeladen und eingetragen. 
+  
+Die Excel-Datei befindet sich nun im gleichen Ordner wie dieses dokument und kann
+händisch von euch in allen Feldern bearbeitet werden. In dem Dokument XXXX wird dazu
+detailiert aufgeführt, wie welche Informationen eingetragen werden müssen, damit die
+Karte mit den Daten umgehen und diese verarbeiten kann.
+
+              ACHTUNG: Wenn ihr Informationen von Hand in die Tabelle eintragt, 
+              achtet darauf, dass ihr den Namen der Excel-Datei nicht ändert. Dieser
+              sollte immer XXX sein und immer in dem Ordner gespeichert werden,
+              in dem sich auch dieses Dokument befindet. Andernfalls kann der weitere
+              Code nicht auf die Daten zugreifen und eure Karte aktualisiert sich nicht.
+
+```{r}
+
+```
+
+## ------------------------------ ##
+## Schritt 2: Karte aktualisieren ##
+## ------------------------------ ##
+
+Sobald ihr vollständig mit der Bearbeitung der Excel-Tabelle fertig seid, könnt ihr
+in Schritt 2 die Karte online aktualisieren. Hierzu genügt es wieder einzig und allein
+auf das grüne Dreieck zu klicken und ein paar Minuten zu warten. Wenn die Karte erfolg-
+reich aktualisiert wurde, öffnet sich automatisch ein Browserfenster mit eurer Karte. 
+
+Nicht wundern: Es öffnet sich dabei nicht die Karte auf erlassjahr.de, sondern die auf
+erlassjahr.shinyapps.io/erlassjahr/ --> die Karte auf eurer Homepage ist damit aber 
+automatisch auch aktualisiert.
+
+```{r}
+
+```
+
+Diesen Schritt könnt ihr beliebig oft wiederholen. Das bedeutet, solltet ihr fest-
+stellen, dass ihr noch Anpassungen an den Daten vornehmen müsst, könnt ihr - nachdem
+ihr die Excel-Datei erneut bearbeitet und gespeichert (NICHT neu durch Schritt 1 erstellt,
+sondern von Hand in Excel bearbeitet) habt - erneut Schritt 2 ausführen und somit die 
+Karte aktualisieren. 
