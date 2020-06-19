@@ -68,8 +68,11 @@ Fr.Guiana@data <- rename(Fr.Guiana@data, iso_a3 = ISO3, geounit = NAME)
 slot(slot(Fr.Guiana, "polygons")[[1]], "ID") = "255"
 
 # Load Data
-load("sr20_erlassjahr.RData")
-data <- sr20_erlassjahr
+# load("sr20_erlassjahr.RData")
+# data <- sr20_erlassjahr
+data <- get(load(paste0("data/final_data_", year, ".RData"),e<- new.env()),e) 
+rm(list=ls(envir=e), envir=e) 
+
 data[data==""]<-NA
 
 data$url <- paste0("<a href='",data$link,"'>",data$ISO3,"</a>")

@@ -346,7 +346,7 @@ sr20_erlassjahr <- sr20_erlassjahr %>%
 
 save(sr20_erlassjahr, file = "sr20_erlassjahr.RData")
 save(sr20_erlassjahr, file = "erlassjahr_map/sr20_erlassjahr.RData")
-
+save(sr20_erlassjahr, file = "data/schuldenreport_2020.RData")
 
 
 

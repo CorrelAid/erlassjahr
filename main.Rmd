@@ -96,9 +96,11 @@ Karte mit den Daten umgehen und diese verarbeiten kann.
               in dem sich auch dieses Dokument befindet. Andernfalls kann der weitere
               Code nicht auf die Daten zugreifen und eure Karte aktualisiert sich nicht.
 
-```{r}
-
+```{r, warning = FALSE}
+source("scripts/template_setup.R")
 ```
+
+Wenn alles durchgelaufen ist, verschwindet der grüne Balken links :)
 
 ## ------------------------------ ##
 ## Schritt 2: Karte aktualisieren ##
@@ -118,7 +120,7 @@ erlassjahr.shinyapps.io/erlassjahr/ --> die Karte auf eurer Homepage ist damit a
 automatisch auch aktualisiert.
 
 ```{r}
-
+source("scripts/data_preparation.R")
 ```
 
 Diesen Schritt könnt ihr beliebig oft wiederholen. Das bedeutet, solltet ihr fest-

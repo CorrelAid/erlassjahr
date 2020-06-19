@@ -56,19 +56,19 @@ sr_df$zahlungssituation <- ifelse(
 indicator_names <-
   c(
     "oeffentliche_schulden_bip",
-    "oeffentliche_schulden_bip_indicator",
+    #"oeffentliche_schulden_bip_indicator",
     "trend_oe_schulden_bip",
     "oeffentliche_schulden_staatseinnahmen",
-    "oeffentliche_schulden_staatseinnahmen_indicator",
+    #"oeffentliche_schulden_staatseinnahmen_indicator",
     "trend_oe_schulden_staat",
     "auslandsschulden_bip",
-    "auslandsschulden_bip_indicator",
+    #"auslandsschulden_bip_indicator",
     "trend_ausl_bip",
     "auslandsschuldenstand_exporteinnahmen",
-    "auslandsschuldenstand_exporteinnahmen_indicator",
+    #"auslandsschuldenstand_exporteinnahmen_indicator",
     "trend_aus_schuldenstand_export",
     "auslandsschuldendienst_exporteinnahmen",
-    "auslandsschuldendienst_exporteinnahmen_indicator",
+    #"auslandsschuldendienst_exporteinnahmen_indicator",
     "trend_ausl_schuldendienst_export",
     "iwf_einschaetzung"
   )
@@ -93,6 +93,7 @@ WB_input <- function (year, countries) {
   )
   return(data)
 }
+
 # getting the data
 countries <- sr_df %>%
   filter(oecd == 0 & keine_daten == 0) %>%
@@ -105,14 +106,14 @@ raw_indicators$iso2c <-
   countrycode::countrycode(raw_indicators$iso2c,
                            "iso2c", "iso3c")
 
-sr_df <- merge(sr_df, raw_indicators, by.x = "ISO3", by.y = "iso2c")
+sr_df <- merge(sr_df, raw_indicators, by.x = "ISO3", by.y = "iso2c", all.x = TRUE)
 sr_df$oeffentliche_schulden_staatseinnahmen <-
   sr_df$DT.DOD.DECT.GN.ZS
 sr_df$auslandsschuldenstand_exporteinnahmen <-
   sr_df$DT.DOD.DECT.EX.ZS
 sr_df$auslandsschuldendienst_exporteinnahmen <-
   sr_df$DT.TDS.DECT.EX.ZS
-#deleting the helping colums
+#deleting the helping columns
 sr_df <-
   subset(sr_df,
          select = -c(country, year, DT.DOD.DECT.GN.ZS, DT.DOD.DECT.EX.ZS, DT.TDS.DECT.EX.ZS))
@@ -121,6 +122,6 @@ sr_df <-
 ## Export Dataframe ##
 ##------------------##
 
-writexl::write_xlsx(sr_df, path = "schuldenreport_vorlage.xlsx")
+writexl::write_xlsx(sr_df, path = paste0("schuldenreport_vorlage_", year, ".xlsx"))
 
 
