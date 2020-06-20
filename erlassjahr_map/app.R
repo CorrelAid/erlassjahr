@@ -413,10 +413,7 @@ server <- function(input, output, session) {
                          colors = c(s.kritisch, kritisch,  l.kritisch, n.kritisch, k.Daten, nT.Analyse), #, risk.fact )
                          opacity = 1, title = "Verschuldungssituation",
                          labels = Llabels
-      ) %>%
-      addPopups(-80, -70, content,
-                options = popupOptions(closeButton = FALSE)
-      )
+      ) 
     
     proxy <- leafletProxy(mapId = "map1", data = trend_data) %>%
       clearMarkers()
