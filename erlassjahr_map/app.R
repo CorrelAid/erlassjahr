@@ -124,18 +124,7 @@ ui <- fluidPage(
           tags$style(type = "text/css", 
                      ".outer {position: fixed; top: 0; 
                      left: 0; right: 0; bottom: 0; padding: 0}", 
-                     ".selectize-dropdown-content {max-height: 100px; }",
-                     ".leaflet-popup-content-wrapper {
-                       background: white;
-                       color: black;
-                         padding: 2px;
-                       border-radius: 0px;
-                       opacity: 0.5;
-                     }",
-                    " .leaflet-popup-tip {
-                       background: red;
-                      opacity: 0;
-                     }"
+                     ".selectize-dropdown-content {max-height: 100px; }"
                      ), # overflow:   hidden;
           
           
@@ -233,6 +222,7 @@ k.Daten <- "#808080"
 nT.Analyse <-  "#F0F2E8"
 hint.grnd <- " #B3F0D4"
 risk.fact <- "#3D36C7"
+label.color <- '#FFFFFF'
 
 # Choice vector for Mouseover
 choiceVec <-  c("Aggregierte Indikatoren" = "debt_sit_cat2",
@@ -297,22 +287,22 @@ server <- function(input, output, session) {
   Legend.Labels <- reactive({
     if (input$var_debtindikator == "debt_sit_cat2") {
       legende <- c("sehr kritisch", "kritisch", "leicht kritisch",
-                   "nicht kritisch", "keine Daten vorhanden", "nicht Teil der Betrachtung")
+                   "nicht kritisch", "keine Daten vorhanden", "nicht Teil der Betrachtung", "Quelle: erlassjahr.de")
     } else if (input$var_debtindikator == "public_debt_bip2") {
       legende <- c("> 100 %", "75% - 100%", "50% - 75%",
-                   "< 50%", "keine Daten vorhanden", "nicht Teil der Betrachtung")
+                   "< 50%", "keine Daten vorhanden", "nicht Teil der Betrachtung", "Quelle: erlassjahr.de")
     } else if (input$var_debtindikator == "public_debt_state_rev2") {
       legende <- c("> 400 %", "300% - 400%", "200% - 300%",
-                   "< 200%", "keine Daten vorhanden", "nicht Teil der Betrachtung")
+                   "< 200%", "keine Daten vorhanden", "nicht Teil der Betrachtung", "Quelle: erlassjahr.de")
     } else if (input$var_debtindikator == "foreign_debt_bip2") {
       legende <- c("> 80 %", "60% - 80%", "40% - 60%",
-                   "< 40%", "keine Daten vorhanden", "nicht Teil der Betrachtung")
+                   "< 40%", "keine Daten vorhanden", "nicht Teil der Betrachtung", "Quelle: erlassjahr.de")
     } else if (input$var_debtindikator == "foreign_debt_exp2") {
       legende <- c("> 300 %", "225% - 300%", "150% - 225%",
-                   "< 150%", "keine Daten vorhanden", "nicht Teil der Betrachtung")
+                   "< 150%", "keine Daten vorhanden", "nicht Teil der Betrachtung", "Quelle: erlassjahr.de")
     } else  {
       legende <- c("> 30 %", "22,5% - 30%", "15% - 22,5%",
-                   "< 15%", "keine Daten vorhanden", "nicht Teil der Betrachtung")
+                   "< 15%", "keine Daten vorhanden", "nicht Teil der Betrachtung", "Quelle: erlassjahr.de")
       }
   })
   # Create Basemap:
@@ -473,7 +463,7 @@ server <- function(input, output, session) {
         clearControls() %>%
         leaflet::addLegend(
           position = "bottomright",
-          colors   = c(s.kritisch, kritisch,  l.kritisch, n.kritisch, k.Daten, nT.Analyse), #, risk.fact ),
+          colors   = c(s.kritisch, kritisch,  l.kritisch, n.kritisch, k.Daten, nT.Analyse, label.color), #, risk.fact ),
           opacity  = 1, title = "Verschuldungssituation",
           labels   = map_conf$Llabels
         )  %>%
