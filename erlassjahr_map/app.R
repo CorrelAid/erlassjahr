@@ -305,6 +305,15 @@ server <- function(input, output, session) {
                    "< 15%", "keine Daten vorhanden", "nicht Teil der Betrachtung", "Quelle: erlassjahr.de")
       }
   })
+  
+Mouse.Symb <- reactive({
+    if (input$var_debtindikator == "debt_sit_cat2") {
+      var <- ""
+    } else {
+     var <- "%"
+    }
+ }) 
+  
   # Create Basemap:
   foundation_map <- reactive({
     
@@ -374,7 +383,7 @@ server <- function(input, output, session) {
     mytext <- paste0(
       "<b>", map@data$country, "</b>","<br/>",
       names(choiceVec)[choiceVec == input$var_debtindikator], ": ", 
-      "<b>", map$mouseover, "</b>", "<br/>",
+      "<b>", map$mouseover, Mouse.Symb(), "</b>", "<br/>",
       "Mit Mausklick zum Länderprofil" ) %>%
       lapply(htmltools::HTML)
     # Transform shapefile for poligon input
