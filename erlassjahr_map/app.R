@@ -205,7 +205,10 @@ ui <- fluidPage(
                     "Anhaltende und zwischenzeitliche Zahlungseinstellungen anzeigen", 
                     value = FALSE
       ),
-      downloadButton( outputId = "dl")
+      downloadButton( outputId = "dl"),
+      actionButton(inputId='Method', label="Methodik: Schuldenreport von erlassjahr.de und Misereor", 
+                   icon = icon("th"), 
+                   onclick ="window.open('https://erlassjahr.de/produkt-kategorie/schuldenreporte/')")
     )
   )
 )
