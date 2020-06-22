@@ -14,8 +14,8 @@ output: html_document
 
 Die Arbeitsschritte um mit dieser Datei zu arbeiten teilt sich auf in 2 Schritte:
 
-  1. Erstelle eine neue Excel-Tabelle
-  2. Aktualisiere die Karte
+  1. Erstellen einer neuen Excel-Tabelle
+  2. Aktualisierung der Karte
 
 Erst wenn ihr die Excel-Tabelle aus Schritt 1 vollständig erstellt und gespeichert
 habt, könnt ihr Schritt 2 ausführen. 
@@ -41,7 +41,7 @@ chunk), das ihr bearbeiten müsst. Im Feld hier unten seht ihr den code:
 
 Bevor ihr einen Arbeitsschritt ausführt müsst ihr sicherstellen, dass anstatt der
 "XXXX" hier das aktuelle Jahr eurer Karte und eures Schuldenberichts steht. Für
-den Schuldenreport 2021 müsste von daher
+den Schuldenreport 2021 müsste daher
           
           year <- 2021
           
@@ -73,9 +73,9 @@ kleine Diskettensymbol oben in der Icon-Leiste klicken.
 
 Nachdem ihr das Jahr erfolgreich eingetragen habt, ist der erste Schritt, die Excel-
 Tabelle für ein Schuldenjahr zu erstellen. Wenn das Jahr oben "2021" ist, erstellt euch
-der Code unten eine halb ausgefüllte Excel-Tabelle mit folgenden Informationen:
-
-XXXX
+der Code unten eine halb ausgefüllte Excel-Tabelle mit allen statischen Informationen
+wie z.B. dem Namen der Länder, die Region, ob sie ein OECD Land sind oder auch die 
+statischen Informationen zu Extrakvismus (u.Ä.) sowie Daten von der Weltbank.
 
 Diese Informationen werden aus 2 Quellen generiert:
 
@@ -86,13 +86,13 @@ Diese Informationen werden aus 2 Quellen generiert:
   von der Website der Weltbank heruntergeladen und eingetragen. 
   
 Die Excel-Datei befindet sich nun im gleichen Ordner wie dieses dokument und kann
-händisch von euch in allen Feldern bearbeitet werden. In dem Dokument XXXX wird dazu
-detailiert aufgeführt, wie welche Informationen eingetragen werden müssen, damit die
-Karte mit den Daten umgehen und diese verarbeiten kann.
+händisch von euch in allen Feldern bearbeitet werden. Im Anleitungsdokument zu 
+Schritt 1 wird dazu detailiert aufgeführt, wie welche Informationen eingetragen 
+werden müssen, damit die Karte mit den Daten umgehen und diese verarbeiten kann.
 
               ACHTUNG: Wenn ihr Informationen von Hand in die Tabelle eintragt, 
               achtet darauf, dass ihr den Namen der Excel-Datei nicht ändert. Dieser
-              sollte immer XXX sein und immer in dem Ordner gespeichert werden,
+              sollte immer gleib bleiben und immer in dem Ordner gespeichert werden,
               in dem sich auch dieses Dokument befindet. Andernfalls kann der weitere
               Code nicht auf die Daten zugreifen und eure Karte aktualisiert sich nicht.
 
