@@ -46,7 +46,7 @@ FindColNumber <- function(df,input){
 }
 
 # Implement modules for cleaning code:
-m <- modules::use("graphics.R")
+m <- modules::use("scripts/graphics.R")
 FeuerIcons <- m$FeuerIcons()
 PfeilIcons <- m$PfeilIcons()
 ##--------------------------------------------------##
@@ -55,10 +55,10 @@ PfeilIcons <- m$PfeilIcons()
 
 # load the year variable created from data_preparation.R to build the correct
 # map for a given year
-load("year_data.Rdata")
+load("data/year_data.Rdata")
 
 # Map Data / Shape File
-shape_path <- "TM_WORLD_BORDERS_SIMPL-0.3.shp"
+shape_path <- "map_files/TM_WORLD_BORDERS_SIMPL-0.3.shp"
 encoding <- "UTF-8"
 
 LonLat <- readOGR(dsn=path.expand(shape_path), 
