@@ -16,7 +16,7 @@ library(writexl) # Export Data Frames to Excel 'xlsx' Format
 library(WDI) # World Development Indicators (World Bank) # World Development Indicators (World Bank)
 
 ## Load the main data that was used for the initial map to build template
-sr_df <- get(load(paste0("data/schuldenreport_", year, ".RData"),e<- new.env()),e) 
+sr_df <- get(load(paste0("data/schuldenreport_", year -1, ".RData"),e<- new.env()),e) 
 rm(list=ls(envir=e), envir=e) 
 
 ##------------------##
