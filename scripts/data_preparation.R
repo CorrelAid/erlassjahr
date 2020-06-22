@@ -194,3 +194,4 @@ sr_df$payment_stop <- ifelse(
 ############################
 
 save(sr_df, file = paste0("data/final_data_", year, ".RData"))
+save(sr_df, file = paste0("erlassjahr_map/data/final_data_", year, ".RData"))

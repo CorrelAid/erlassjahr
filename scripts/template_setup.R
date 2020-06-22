@@ -56,52 +56,42 @@ sr_df$zahlungssituation <- ifelse(
 indicator_names <-
   c(
     "oeffentliche_schulden_bip",
-    #"oeffentliche_schulden_bip_indicator",
     "trend_oe_schulden_bip",
     "oeffentliche_schulden_staatseinnahmen",
-    #"oeffentliche_schulden_staatseinnahmen_indicator",
     "trend_oe_schulden_staat",
     "auslandsschulden_bip",
-    #"auslandsschulden_bip_indicator",
     "trend_ausl_bip",
     "auslandsschuldenstand_exporteinnahmen",
-    #"auslandsschuldenstand_exporteinnahmen_indicator",
     "trend_aus_schuldenstand_export",
     "auslandsschuldendienst_exporteinnahmen",
-    #"auslandsschuldendienst_exporteinnahmen_indicator",
     "trend_ausl_schuldendienst_export",
     "iwf_einschaetzung"
   )
 # add empty columns to add manually
 sr_df[, indicator_names] <- NA
 
-#######################
-##WB Input           ##
-#######################
+##--------------##
+## WDI API call ##
+##--------------##
 
-# getter function
-WB_input <- function (year, countries) {
-  library(WDI) # World Development Indicators (World Bank) # World Development Indicators (World Bank)
-  dataSeries = c("DT.DOD.DECT.GN.ZS",
-                 "DT.DOD.DECT.EX.ZS",
-                 "DT.TDS.DECT.EX.ZS")
-  data = WDI(
+# function to extract the three main WDI variables from the API using WDI
+WB_input <- function (year) {
+  dataSeries <- c("DT.DOD.DECT.GN.ZS",
+                  "DT.DOD.DECT.EX.ZS",
+                  "DT.TDS.DECT.EX.ZS")
+  data <- WDI(
     indicator = dataSeries,
-    country = countries,
+    country = "all",
     start = year,
     end = year
   )
   return(data)
 }
 
-# getting the data
-countries <- sr_df %>%
-  filter(oecd == 0 & keine_daten == 0) %>%
-  pull(ISO3)
+# using the function for the year t-2 to get the most recent data available
+raw_indicators <- WB_input(year - 2)
 
-raw_indicators <- WB_input(year - 2 , countries)
-
-#merging the data
+# merging the data
 raw_indicators$iso2c <-
   countrycode::countrycode(raw_indicators$iso2c,
                            "iso2c", "iso3c")
