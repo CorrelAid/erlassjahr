@@ -115,16 +115,38 @@ in Schritt 2 die Karte online aktualisieren. Hierzu genügt es wieder einzig und
 auf das grüne Dreieck zu klicken und ein paar Minuten zu warten. Wenn die Karte erfolg-
 reich aktualisiert wurde, öffnet sich automatisch ein Browserfenster mit eurer Karte. 
 
-Nicht wundern: Es öffnet sich dabei nicht die Karte auf erlassjahr.de, sondern die auf
-erlassjahr.shinyapps.io/erlassjahr/ --> die Karte auf eurer Homepage ist damit aber 
-automatisch auch aktualisiert.
+Um die Karte zu aktualisieren, wird zunächst eure finale Excel-Datei im folgenden
+Schritt automatisch weiterverarbeitet. Hierbei entstehen beispielsweise die 
+Kategorien für die Indikatoren. Erst wenn der folgende Schritt erfolgreich durch-
+gelaufen ist, sprich, wenn nach dem Klick auf das grüne Dreieck der grüne Balken
+auf der linken Seite verschwunden ist, könnt ihr im finalen Schritt ganz unten
+die Karte auf eurer Homepage aktualisieren.
 
 ```{r}
 source("scripts/data_preparation.R")
 ```
 
-Diesen Schritt könnt ihr beliebig oft wiederholen. Das bedeutet, solltet ihr fest-
-stellen, dass ihr noch Anpassungen an den Daten vornehmen müsst, könnt ihr - nachdem
+Wenn alles erfolgreich war, könnt ihr wie gewohnt auf das grüne Dreieck klicken um
+die Karte zu aktualisieren. Solange die Karte aktualisiert wird, seht ihr auch ein
+kleines Zahnrad unterhalb des Codes. Sobald die Karte erfolgreich aktualisiert wurde
+verschwindet das Zahnrad und es öffnet sich euer Browser der euch die aktuellste
+Version der Karte zeigt. Die Informationen zur Aktualisierung unterhalb des Codes
+könnt ihr im Anschluss an die Aktualisierung ganz einfach mit dem kleinen X rechts
+(unterhalb des grünen Dreiecks) entfernen - diese benötigt ihr nicht mehr. Es ist
+aber auch nich schlimm diese einfach offen zu lassen.
+
+```{r}
+rsconnect::deployApp("erlassjahr_map/", account = "erlassjahr", forceUpdate = TRUE)
+```
+
+Nicht wundern: Dieser Schritt kann einige Minuten dauern da die Karte von Grund
+auf neu gebaut wird und die alte Version vollständig gestoppt wird. Wenn alles durch-
+gelaufen ist, öffnet sich die Karte nicht auf erlassjahr.de, sondern auf
+erlassjahr.shinyapps.io/erlassjahr_map/ --> die Karte auf eurer Homepage ist damit aber 
+auch automatisch aktualisiert.
+
+Schritt 2 könnt ihr beliebig oft wiederholen. Das bedeutet, solltet ihr fest-
+stellen, dass ihr noch Anpassungen an der Excel-Datei vornehmen müsst, könnt ihr - nachdem
 ihr die Excel-Datei erneut bearbeitet und gespeichert (NICHT neu durch Schritt 1 erstellt,
 sondern von Hand in Excel bearbeitet) habt - erneut Schritt 2 ausführen und somit die 
 Karte aktualisieren. 
