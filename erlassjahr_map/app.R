@@ -21,9 +21,9 @@ library(DT) # A Wrapper of the JavaScript Library 'DataTables'
 library(rgdal) # Bindings for the 'Geospatial' Data Abstraction Library
 library(leaflet) # Create Interactive Web Maps with the JavaScript 'Leaflet' Library
 library(maps) # Draw Geographical Maps
+library(plyr) # Tools for Splitting, Applying and Combining Data
 library(dplyr) # A Grammar of Data Manipulation
 library(english) # Translate Integers into English
-library(plyr) # Tools for Splitting, Applying and Combining Data
 library(readxl) # Read Excel Files
 library(countrycode) # Convert Country Names and Country Codes
 library(magrittr) # A Forward-Pipe Operator for R
@@ -52,6 +52,10 @@ PfeilIcons <- m$PfeilIcons()
 ##--------------------------------------------------##
 ## Load Data                                        ##
 ##--------------------------------------------------##
+
+# load the year variable created from data_preparation.R to build the correct
+# map for a given year
+load("year_data.Rdata")
 
 # Map Data / Shape File
 shape_path <- "TM_WORLD_BORDERS_SIMPL-0.3.shp"
@@ -206,7 +210,7 @@ ui <- fluidPage(
                     value = FALSE
       ),
       downloadButton( outputId = "dl"),
-      actionButton(inputId='Method', label="Methodik: Schuldenreport von erlassjahr.de und Misereor", 
+      actionButton(inputId='Method', label=HTML("Methodik: Schuldenreport <br/> von erlassjahr.de und Misereor"), 
                    icon = icon("th"), 
                    onclick ="window.open('https://erlassjahr.de/produkt-kategorie/schuldenreporte/')")
     )
@@ -225,7 +229,7 @@ k.Daten <- "#808080"
 nT.Analyse <-  "#F0F2E8"
 hint.grnd <- " #B3F0D4"
 risk.fact <- "#3D36C7"
-label.color <- '#FFFFFF'
+label.color <- '#f6f8f8'
 
 # Choice vector for Mouseover
 choiceVec <-  c("Aggregierte Indikatoren" = "debt_sit_cat2",
@@ -422,7 +426,7 @@ Mouse.Symb <- reactive({
       # Make legend
       leaflet::addLegend(position = "bottomright",
                          # Specify colors manually b/c pal function does not show colors in legend
-                         colors = c(s.kritisch, kritisch,  l.kritisch, n.kritisch, k.Daten, nT.Analyse), #, risk.fact )
+                         colors   = c(s.kritisch, kritisch,  l.kritisch, n.kritisch, k.Daten, nT.Analyse, label.color), #, risk.fact ),
                          opacity = 1, title = "Verschuldungssituation",
                          labels = Llabels
       ) 

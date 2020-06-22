@@ -5,6 +5,6 @@ account: erlassjahr
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 2460935
-bundleId: 3286981
+bundleId: 3301244
 url: https://erlassjahr.shinyapps.io/erlassjahr_map/
-when: 1592480506.44641
+when: 1592819586.93585

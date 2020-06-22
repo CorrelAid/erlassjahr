@@ -18,6 +18,9 @@ library(english)
 # load all required functions from the helper file
 source("scripts/functions.R")
 
+# create year_data with current year to let the app know the building year
+save(year, file = "erlassjahr_map/year_data.Rdata")
+
 ##-------------##
 ##  Load Data  ##
 ##-------------##
