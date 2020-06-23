@@ -16,8 +16,10 @@ library(writexl) # Export Data Frames to Excel 'xlsx' Format
 library(WDI) # World Development Indicators (World Bank) # World Development Indicators (World Bank)
 
 ## Load the main data that was used for the initial map to build template
-sr_df <- get(load(paste0("data/final_data_", year -1, ".RData"),e<- new.env()),e) 
-rm(list=ls(envir=e), envir=e) 
+sr_df <-
+  get(load(paste0("data/final_data_", year - 1, ".RData"), e <-
+             new.env()), e)
+rm(list = ls(envir = e), envir = e)
 
 ##------------------##
 ## Data Preparation ##
@@ -25,7 +27,20 @@ rm(list=ls(envir=e), envir=e)
 
 # keep only static information (country name, region, oecd member, etc.)
 sr_df <- sr_df %>%
-  select(ISO3, country, region, oecd, no_data, extractivism, fragility, debt_prob, vulnerability, payment_stop, income, link)
+  select(
+    ISO3,
+    country,
+    region,
+    oecd,
+    no_data,
+    extractivism,
+    fragility,
+    debt_prob,
+    vulnerability,
+    payment_stop,
+    income,
+    link
+  )
 
 # German country names
 custom_match <- c("RKS" = "Kosovo")
@@ -34,20 +49,24 @@ sr_df$country <-
 
 # rename country and data variable
 sr_df %<>%
-  rename(land = country,
-         keine_daten = no_data,
-         extraktivismus = extractivism,
-         fragilitaet = fragility,
-         problematische_schuldenstruktur = debt_prob,
-         vulnerabilitaet_naturkatastrophen = vulnerability,
-         zahlungssituation = payment_stop)
+  rename(
+    land = country,
+    keine_daten = no_data,
+    extraktivismus = extractivism,
+    fragilitaet = fragility,
+    problematische_schuldenstruktur = debt_prob,
+    vulnerabilitaet_naturkatastrophen = vulnerability,
+    zahlungssituation = payment_stop
+  )
 
 # replace feuer_* with numeric indicators
 
 sr_df$zahlungssituation <- ifelse(
-  sr_df$zahlungssituation == "feuer_grau", 1,
+  sr_df$zahlungssituation == "feuer_grau",
+  1,
   ifelse(
-    sr_df$zahlungssituation == "feuer_orange", 2,
+    sr_df$zahlungssituation == "feuer_orange",
+    2,
     ifelse(sr_df$zahlungssituation == "feuer_rot", 3, NA)
   )
 )
@@ -96,7 +115,14 @@ raw_indicators$iso2c <-
   countrycode::countrycode(raw_indicators$iso2c,
                            "iso2c", "iso3c")
 
-sr_df <- merge(sr_df, raw_indicators, by.x = "ISO3", by.y = "iso2c", all.x = TRUE)
+sr_df <-
+  merge(
+    sr_df,
+    raw_indicators,
+    by.x = "ISO3",
+    by.y = "iso2c",
+    all.x = TRUE
+  )
 sr_df$oeffentliche_schulden_staatseinnahmen <-
   sr_df$DT.DOD.DECT.GN.ZS
 sr_df$auslandsschuldenstand_exporteinnahmen <-
@@ -105,13 +131,19 @@ sr_df$auslandsschuldendienst_exporteinnahmen <-
   sr_df$DT.TDS.DECT.EX.ZS
 #deleting the helping columns
 sr_df <-
-  subset(sr_df,
-         select = -c(country, year, DT.DOD.DECT.GN.ZS, DT.DOD.DECT.EX.ZS, DT.TDS.DECT.EX.ZS))
+  subset(
+    sr_df,
+    select = -c(
+      country,
+      year,
+      DT.DOD.DECT.GN.ZS,
+      DT.DOD.DECT.EX.ZS,
+      DT.TDS.DECT.EX.ZS
+    )
+  )
 
 ##------------------##
 ## Export Dataframe ##
 ##------------------##
 
 writexl::write_xlsx(sr_df, path = paste0("schuldenreport_vorlage_", year, ".xlsx"))
-
-
