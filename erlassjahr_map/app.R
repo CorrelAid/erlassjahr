@@ -120,7 +120,7 @@ ui <- fluidPage(#titlePanel(title = h1("Erlassjahr app", style = "color:#3474A7"
         type = "text/css",
         ".outer {position: fixed; top: 0;
                      left: 0; right: 0; bottom: 0; padding: 0}",
-        ".selectize-dropdown-content {max-height: 100px; }"
+        ".selectize-dropdown-content {max-height: 400px; }"
       ),
       # overflow:   hidden;
       
