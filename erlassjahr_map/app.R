@@ -315,6 +315,7 @@ server <- function(input, output, session) {
         "nicht kritisch",
         "keine Daten vorhanden",
         "nicht Teil der Betrachtung",
+        " ",
         "Quelle: erlassjahr.de"
       )
     } else if (input$var_debtindikator == "public_debt_bip2") {
@@ -325,6 +326,7 @@ server <- function(input, output, session) {
         "< 50%",
         "keine Daten vorhanden",
         "nicht Teil der Betrachtung",
+        " ",
         "Quelle: erlassjahr.de"
       )
     } else if (input$var_debtindikator == "public_debt_state_rev2") {
@@ -335,6 +337,7 @@ server <- function(input, output, session) {
         "< 200%",
         "keine Daten vorhanden",
         "nicht Teil der Betrachtung",
+        " ",
         "Quelle: erlassjahr.de"
       )
     } else if (input$var_debtindikator == "foreign_debt_bip2") {
@@ -345,6 +348,7 @@ server <- function(input, output, session) {
         "< 40%",
         "keine Daten vorhanden",
         "nicht Teil der Betrachtung",
+        " ",
         "Quelle: erlassjahr.de"
       )
     } else if (input$var_debtindikator == "foreign_debt_exp2") {
@@ -355,6 +359,7 @@ server <- function(input, output, session) {
         "< 150%",
         "keine Daten vorhanden",
         "nicht Teil der Betrachtung",
+        " ",
         "Quelle: erlassjahr.de"
       )
     } else  {
@@ -365,6 +370,7 @@ server <- function(input, output, session) {
         "< 15%",
         "keine Daten vorhanden",
         "nicht Teil der Betrachtung",
+        " ",
         "Quelle: erlassjahr.de"
       )
     }
@@ -504,6 +510,7 @@ server <- function(input, output, session) {
           n.kritisch,
           k.Daten,
           nT.Analyse,
+          label.color,
           label.color
         ),
         #, risk.fact ),
@@ -567,6 +574,7 @@ server <- function(input, output, session) {
           n.kritisch,
           k.Daten,
           nT.Analyse,
+          label.color,
           label.color
         ),
         #, risk.fact ),
