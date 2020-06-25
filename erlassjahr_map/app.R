@@ -110,8 +110,7 @@ map <-
 ## User Interface Shiny                             ##
 ##--------------------------------------------------##
 
-ui <- fluidPage(#titlePanel(title = h1("Erlassjahr app", style = "color:#3474A7", align = "left")),
-  #tags$style(mycss),
+ui <- fluidPage(
   #layout with main area and side bar
   sidebarLayout(
     mainPanel(div(
@@ -122,9 +121,6 @@ ui <- fluidPage(#titlePanel(title = h1("Erlassjahr app", style = "color:#3474A7"
                      left: 0; right: 0; bottom: 0; padding: 0}",
         ".selectize-dropdown-content {max-height: 400px; }"
       ),
-      # overflow:   hidden;
-      
-      
       
       leafletOutput(
         outputId = "map1",
@@ -419,10 +415,6 @@ server <- function(input, output, session) {
              map@data$link,
              "', target=\"_blank\">Zum Länderprofil </a>")
     
-    
-    # Select Polygons for Riskfactor
-    #map$riskplot <- map@data[, input$var_risiko]
-    
     #Select input for mouseover text
     map$mouseover <-
       map@data[, gsub('.$', '', input$var_debtindikator)]
@@ -450,7 +442,7 @@ server <- function(input, output, session) {
         levels = c(-1, 0, 1, 2, 3),
         na.color = "#808080"
       )
-    
+    # Create list of labels for legend
     Llabels <- Legend.Labels()
     
     # Create text shown when mouse glides over countries
