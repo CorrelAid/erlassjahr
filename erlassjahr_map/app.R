@@ -135,8 +135,8 @@ ui <- fluidPage(#titlePanel(title = h1("Erlassjahr app", style = "color:#3474A7"
     
     # Create movable fixed (absolute) side panel
     absolutePanel(
-      top = 30,
-      left = 45,
+      top = 10,
+      left = 50,
       width = 200,
       fixed = TRUE,
       draggable = TRUE,
