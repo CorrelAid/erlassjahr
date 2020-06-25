@@ -209,7 +209,7 @@ ui <- fluidPage(#titlePanel(title = h1("Erlassjahr app", style = "color:#3474A7"
       downloadButton(outputId = "dl"),
       actionButton(
         inputId = 'Method',
-        label = HTML("Methodik: Schuldenreport <br/> von erlassjahr.de und Misereor"),
+        label = HTML("Methodik: Schuldenreport&nbsp;&nbsp;&nbsp; <br/> von erlassjahr.de und Misereor"),
         icon = icon("th"),
         onclick = "window.open('https://erlassjahr.de/produkt-kategorie/schuldenreporte/')"
       )
