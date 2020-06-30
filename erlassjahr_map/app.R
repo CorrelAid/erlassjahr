@@ -29,14 +29,14 @@ if (!webshot::is_phantomjs_installed()) {
 }
 
 
-FindColNumber <- function(df, input) {
+findColNumber <- function(df, input) {
   as.numeric(which(colnames(df) == input))
 }
 
 # Implement modules 
 m <- modules::use("scripts/graphics.R")
-FeuerIcons <- m$FeuerIcons()
-PfeilIcons <- m$PfeilIcons()
+feuerIcons <- m$FeuerIcons()
+pfeilIcons <- m$PfeilIcons()
 ##--------------------------------------------------##
 ## Load Data                                        ##
 ##--------------------------------------------------##
@@ -49,16 +49,16 @@ load("data/year_data.Rdata")
 shape_path <- "map_files/TM_WORLD_BORDERS_SIMPL-0.3.shp"
 encoding <- "UTF-8"
 
-LonLat <- readOGR(dsn = path.expand(shape_path),
+lon_lat <- readOGR(dsn = path.expand(shape_path),
                   layer = "TM_WORLD_BORDERS_SIMPL-0.3",
                   encoding = encoding)
 # Select French-Guiana to merge to shapefile (Missing in ne data)
-Fr.Guiana <- LonLat[LonLat$ISO3 == "GUF", ]
-Fr.Guiana@data <- Fr.Guiana@data[c("ISO3", "NAME")]
-Fr.Guiana@data <-
-  rename(Fr.Guiana@data, iso_a3 = ISO3, geounit = NAME)
+fr_guiana <- lon_lat[lon_lat$ISO3 == "GUF", ]
+fr_guiana@data <- fr_guiana@data[c("ISO3", "NAME")]
+fr_guiana@data <-
+  rename(fr_guiana@data, iso_a3 = ISO3, geounit = NAME)
 # Rename the Polygon ID to 255 to have unique ones
-slot(slot(Fr.Guiana, "polygons")[[1]], "ID") = "255"
+slot(slot(fr_guiana, "polygons")[[1]], "ID") = "255"
 
 # Load Data
 data <-
@@ -80,7 +80,7 @@ sp_data2 <-
 sp_data2@data <- sp_data2@data[c("featurecla", "geounit", "iso_a3")]
 
 # merge the missing polygon to the sp object
-sp_data2 <- raster::bind(sp_data2, Fr.Guiana)
+sp_data2 <- raster::bind(sp_data2, fr_guiana)
 
 # add Missing ISO3 Codes
 sp_data2@data[sp_data2@data$geounit == "France", "iso_a3"] <- "FRA"
@@ -90,7 +90,7 @@ sp_data2@data[sp_data2@data$geounit == "Kosovo", "iso_a3"] <- "RKS"
 # combine data
 map <- sp::merge(sp_data2, data, by.x = "iso_a3", duplicateGeoms = TRUE)
 map@data <- rename(map@data, ISO3 = iso_a3)
-MergeColumns <- LonLat@data[, c("ISO3", "LON", "LAT")]
+MergeColumns <- lon_lat@data[, c("ISO3", "LON", "LAT")]
 map <-
   sp::merge(map, MergeColumns, by.x = "ISO3", duplicateGeoms = TRUE)
 
@@ -204,15 +204,14 @@ ui <- fluidPage(
 ## Farbcodierung Karte                              ##
 ##--------------------------------------------------##
 
-s.kritisch <- "#E61700"
+s_kritisch <- "#E61700"
 kritisch <- "#FF8040"
-l.kritisch <- "#FFCC99"
-n.kritisch <- "#C5C7B8"
-k.Daten <- "#808080"
-nT.Analyse <-  "#F0F2E8"
-hint.grnd <- " #B3F0D4"
-risk.fact <- "#3D36C7"
-label.color <- '#f6f8f8'
+l_kritisch <- "#FFCC99"
+n_kritisch <- "#C5C7B8"
+k_daten <- "#808080"
+nT_analyse <-  "#F0F2E8"
+risk_fact <- "#3D36C7"
+label_color <- '#f6f8f8'
 
 # Choice vector for Mouseover
 choiceVec <-  c(
@@ -235,7 +234,7 @@ server <- function(input, output, session) {
   
   # Select Data according to input
   filteredData <- reactive({
-    col.risiko <- FindColNumber(map@data, input$var_risiko)
+    col_risiko <- findColNumber(map@data, input$var_risiko)
     
     if (input$var_income == "Alle" &
         input$var_region == "Alle" & input$var_risiko == "None") {
@@ -253,22 +252,22 @@ server <- function(input, output, session) {
                region == input$var_region & income == input$var_income)
     } else if (input$var_income == "Alle" &
                input$var_region == "Alle" & input$var_risiko != "None") {
-      data <- subset(map@data, map@data[, col.risiko] == 1)
+      data <- subset(map@data, map@data[, col_risiko] == 1)
     } else if (input$var_income != "Alle" &
                input$var_region == "Alle" & input$var_risiko != "None") {
       data <-
         subset(map@data, income == input$var_income &
-                 map@data[, col.risiko] == 1)
+                 map@data[, col_risiko] == 1)
     } else if (input$var_income == "Alle" &
                input$var_region != "Alle" & input$var_risiko != "None") {
       data <-
         subset(map@data, region == input$var_region &
-                 map@data[, col.risiko] == 1)
+                 map@data[, col_risiko] == 1)
     } else {
       data <-
         subset(map@data,
                region == input$var_region &
-                 income == input$var_income & map@data[, col.risiko] == 1)
+                 income == input$var_income & map@data[, col_risiko] == 1)
     }
     # add regional input when constructed columns with region input
   })
@@ -289,7 +288,7 @@ server <- function(input, output, session) {
     }
   })
   
-  Legend.Labels <- reactive({
+  legendLabels <- reactive({
     if (input$var_debtindikator == "debt_sit_cat2") {
       legende <- c(
         "sehr kritisch",
@@ -359,7 +358,7 @@ server <- function(input, output, session) {
     }
   })
   
-  Mouse.Symb <- reactive({
+  mouseSymb <- reactive({
     if (input$var_debtindikator == "debt_sit_cat2") {
       var <- ""
     } else {
@@ -425,12 +424,12 @@ server <- function(input, output, session) {
     # Create color palette for Debtindicator
     pal <-
       colorFactor(
-        c(nT.Analyse, n.kritisch, l.kritisch, kritisch, s.kritisch),
+        c(nT_analyse, n_kritisch, l_kritisch, kritisch, s_kritisch),
         levels = c(-1, 0, 1, 2, 3),
         na.color = "#808080"
       )
     # Create list of labels for legend
-    Llabels <- Legend.Labels()
+    Llabels <- legendLabels()
     
     # Create text shown when mouse glides over countries
     mytext <- paste0(
@@ -442,7 +441,7 @@ server <- function(input, output, session) {
       ": ",
       "<b>",
       map$mouseover,
-      Mouse.Symb(),
+      mouseSymb(),
       "</b>",
       "<br/>",
       "Mit Mausklick zum Länderprofil"
@@ -483,16 +482,16 @@ server <- function(input, output, session) {
         position = "bottomright",
         # Specify colors manually b/c pal function does not show colors in legend
         colors   = c(
-          s.kritisch,
+          s_kritisch,
           kritisch,
-          l.kritisch,
-          n.kritisch,
-          k.Daten,
-          nT.Analyse,
-          label.color,
-          label.color
+          l_kritisch,
+          n_kritisch,
+          k_daten,
+          nT_analyse,
+          label_color,
+          label_color
         ),
-        #, risk.fact ),
+        #, risk_fact ),
         opacity = 1,
         title = "Verschuldungssituation",
         labels = Llabels
@@ -506,7 +505,7 @@ server <- function(input, output, session) {
       proxy %>% addMarkers(
         lat = trend_data$LAT,
         lng = trend_data$LON,
-        icon = ~ PfeilIcons[trend_data$trendinput] ,
+        icon = ~ pfeilIcons[trend_data$trendinput] ,
         label = trend_data$NAME
       )
     }
@@ -515,7 +514,7 @@ server <- function(input, output, session) {
       proxy %>% addMarkers(
         lat = pay_data$LAT,
         lng = pay_data$LON,
-        icon = ~ FeuerIcons[pay_data$payment_stop] ,
+        icon = ~ feuerIcons[pay_data$payment_stop] ,
         label = pay_data$NAME
       )
     }
@@ -547,16 +546,16 @@ server <- function(input, output, session) {
       leaflet::addLegend(
         position = "bottomright",
         colors   = c(
-          s.kritisch,
+          s_kritisch,
           kritisch,
-          l.kritisch,
-          n.kritisch,
-          k.Daten,
-          nT.Analyse,
-          label.color,
-          label.color
+          l_kritisch,
+          n_kritisch,
+          k_daten,
+          nT_analyse,
+          label_color,
+          label_color
         ),
-        #, risk.fact ),
+        #, risk_fact ),
         opacity  = 1,
         title = "Verschuldungssituation",
         labels   = map_conf$Llabels
@@ -572,7 +571,7 @@ server <- function(input, output, session) {
         addMarkers(
           lat  = map_conf$trend_data$LAT,
           lng  = map_conf$trend_data$LON,
-          icon = ~ PfeilIcons[map_conf$trend_data$trendinput]
+          icon = ~ pfeilIcons[map_conf$trend_data$trendinput]
         )
     }
     
@@ -582,7 +581,7 @@ server <- function(input, output, session) {
         addMarkers(
           lat  = map_conf$pay_data$LAT,
           lng  = map_conf$pay_data$LON,
-          icon = ~ FeuerIcons[map_conf$pay_data$payment_stop]
+          icon = ~ feuerIcons[map_conf$pay_data$payment_stop]
         )
     }
     
