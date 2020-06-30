@@ -15,13 +15,25 @@
 ##--------------------------------------------------##
 ## Prerequisits                                     ##
 ##--------------------------------------------------##
+library(reactlog) # Reactivity Visualizer for 'shiny'
 library(shiny) # Web Application Framework for R
+library(DT) # A Wrapper of the JavaScript Library 'DataTables'
 library(rgdal) # Bindings for the 'Geospatial' Data Abstraction Library
 library(leaflet) # Create Interactive Web Maps with the JavaScript 'Leaflet' Library
+library(maps) # Draw Geographical Maps
+library(plyr) # Tools for Splitting, Applying and Combining Data
 library(dplyr) # A Grammar of Data Manipulation
+library(english) # Translate Integers into English
+library(readxl) # Read Excel Files
+library(countrycode) # Convert Country Names and Country Codes
+library(magrittr) # A Forward-Pipe Operator for R
+library(zoo) # S3 Infrastructure for Regular and Irregular Time Series (Z's Ordered Observations)
 library(modules) # Self Contained Units of Source Code
+library(mapview) # Interactive Viewing of Spatial Data in R
 library(webshot) # Take Screenshots of Web Pages
 library(rnaturalearth) # World Map Data from Natural Earth
+library(rnaturalearthhires) # High Resolution World Vector Map Data from Natural Earth used in rnaturalearth
+library(rnaturalearthdata) # World Vector Map Data from Natural Earth Used in 'rnaturalearth'
 
 # Check for Phantom.js:
 if (!webshot::is_phantomjs_installed()) {
@@ -33,7 +45,7 @@ FindColNumber <- function(df, input) {
   as.numeric(which(colnames(df) == input))
 }
 
-# Implement modules 
+# Implement modules for cleaning code:
 m <- modules::use("scripts/graphics.R")
 FeuerIcons <- m$FeuerIcons()
 PfeilIcons <- m$PfeilIcons()
@@ -110,7 +122,7 @@ ui <- fluidPage(
         ".selectize-dropdown-content {max-height: 400px; }"
       ),
       
-      leaflet::leafletOutput(
+      leafletOutput(
         outputId = "map1",
         height = "100%",
         width = "100%"
@@ -232,6 +244,7 @@ content <- paste0(sep = "<b>", "Quelle erlassjahr.de", "</b>")
 ##--------------------------------------------------##
 
 server <- function(input, output, session) {
+  #output$table <- renderDT(data)
   
   # Select Data according to input
   filteredData <- reactive({
@@ -369,14 +382,14 @@ server <- function(input, output, session) {
   
   # Create Basemap:
   foundation_map <- reactive({
-    leaflet::leaflet(map, options = leaflet::leafletOptions(minZoom = 2, maxZoom = 10)) %>%  #
+    leaflet(map, options = leafletOptions(minZoom = 2, maxZoom = 10)) %>%  #
       addTiles(urlTemplate = 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png') %>% addProviderTiles(provider = "CartoDB.PositronNoLabels") %>%
       setView(0, 15, 2)
     
   })
   
   # create reactive data output
-  output$map1 <- leaflet::renderLeaflet({
+  output$map1 <- renderLeaflet({
     foundation_map()
     
   })
@@ -458,7 +471,7 @@ server <- function(input, output, session) {
     map_conf$Llabels <- Llabels
     
     # Create Map
-    l <- leaflet::leafletProxy("map1", data = map_ll) %>%
+    l <- leafletProxy("map1", data = map_ll) %>%
       clearShapes() %>%
       addPolygons(
         fillColor = ~ pal(variableplot),
@@ -498,7 +511,7 @@ server <- function(input, output, session) {
         labels = Llabels
       )
     
-    proxy <- leaflet::leafletProxy(mapId = "map1", data = trend_data) %>%
+    proxy <- leafletProxy(mapId = "map1", data = trend_data) %>%
       clearMarkers()
     
     # marker für Trend
@@ -531,7 +544,7 @@ server <- function(input, output, session) {
     # and probably long waiting time. But it works :P
     
     output_map <-
-      leaflet::leaflet(map_conf$map) %>%
+      leaflet(map_conf$map) %>%
       addTiles(urlTemplate = 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png') %>%
       addProviderTiles(provider = "CartoDB.PositronNoLabels") %>%
       addPolygons(
@@ -590,14 +603,14 @@ server <- function(input, output, session) {
     
   })
   
-  output$dl <- shiny::downloadHandler(
+  output$dl <- downloadHandler(
     filename = paste0(Sys.Date()
                       , "_erlassjahr_custom_map"
                       , ".pdf")
     
     ,
     content = function(file) {
-      webshot::mapshot(
+      mapshot(
         x = user_created_map()
         ,
         file = file

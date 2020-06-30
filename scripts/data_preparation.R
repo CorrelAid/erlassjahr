@@ -11,7 +11,8 @@
 
 # Dependencies
 library(readxl)
-library(dplyr)
+library(magrittr)
+library(tidyverse)
 library(english)
 
 # load all required functions from the helper file
@@ -24,7 +25,7 @@ save(year, file = "erlassjahr_map/data/year_data.Rdata")
 ##  Load Data  ##
 ##-------------##
 
-sr_df <- readxl::read_xlsx(paste0("schuldenreport_vorlage_", year, ".xlsx"))
+sr_df <- read_xlsx(paste0("schuldenreport_vorlage_", year, ".xlsx"))
 
 ##--------------------##
 ##  Data Preparation  ##
@@ -53,7 +54,7 @@ sr_df %<>%
     payment_stop = zahlungssituation
   ) %>%
   # make sure all logical variables (if they exist) are converted to numeric
-  dplyr::mutate_if(sapply(sr_df, is.logical), as.numeric)
+  mutate_if(sapply(sr_df, is.logical), as.numeric)
 
 ##-------------------##
 ##  Set-up Variables ##

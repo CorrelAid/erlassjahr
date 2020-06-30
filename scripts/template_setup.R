@@ -27,7 +27,7 @@ rm(list = ls(envir = e), envir = e)
 
 # keep only static information (country name, region, oecd member, etc.)
 sr_df <- sr_df %>%
-  dplyr::select(
+  select(
     ISO3,
     country,
     region,

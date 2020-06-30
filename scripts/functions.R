@@ -10,6 +10,9 @@
 ##--------------##
 
 # Dependencies
+library(readxl)
+library(magrittr)
+library(tidyverse)
 library(english)
 
 ##--------------------##
@@ -42,7 +45,7 @@ filter_recode <- function(var, filter) {
 
 trend_new_recode <- function(var) {
   var <-
-    plyr::revalue(as.character(english::as.english(var)), c("minus one" = "minus_one"))
+    plyr::revalue(as.character(as.english(var)), c("minus one" = "minus_one"))
 }
 
 
