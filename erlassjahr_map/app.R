@@ -74,21 +74,21 @@ data$url <- paste0("<a href='", data$link, "'>", data$ISO3, "</a>")
 data <- rename(data, iso_a3 = ISO3)
 
 # Use naturalearth shapefile
-sp_data2 <-
+sp_data <-
   rnaturalearth::ne_countries(scale = "medium", returnclass = "sp")
 # take out unnecesary data
-sp_data2@data <- sp_data2@data[c("featurecla", "geounit", "iso_a3")]
+sp_data@data <- sp_data@data[c("featurecla", "geounit", "iso_a3")]
 
 # merge the missing polygon to the sp object
-sp_data2 <- raster::bind(sp_data2, fr_guiana)
+sp_data <- raster::bind(sp_data, fr_guiana)
 
 # add Missing ISO3 Codes
-sp_data2@data[sp_data2@data$geounit == "France", "iso_a3"] <- "FRA"
-sp_data2@data[sp_data2@data$geounit == "Norway", "iso_a3"] <- "NOR"
-sp_data2@data[sp_data2@data$geounit == "Kosovo", "iso_a3"] <- "RKS"
+sp_data@data[sp_data@data$geounit == "France", "iso_a3"] <- "FRA"
+sp_data@data[sp_data@data$geounit == "Norway", "iso_a3"] <- "NOR"
+sp_data@data[sp_data@data$geounit == "Kosovo", "iso_a3"] <- "RKS"
 
 # combine data
-map <- sp::merge(sp_data2, data, by.x = "iso_a3", duplicateGeoms = TRUE)
+map <- sp::merge(sp_data, data, by.x = "iso_a3", duplicateGeoms = TRUE)
 map@data <- rename(map@data, ISO3 = iso_a3)
 lon_lat_merge <- lon_lat@data[, c("ISO3", "LON", "LAT")]
 map <-
