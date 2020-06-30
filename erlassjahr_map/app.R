@@ -90,9 +90,9 @@ sp_data2@data[sp_data2@data$geounit == "Kosovo", "iso_a3"] <- "RKS"
 # combine data
 map <- sp::merge(sp_data2, data, by.x = "iso_a3", duplicateGeoms = TRUE)
 map@data <- rename(map@data, ISO3 = iso_a3)
-MergeColumns <- lon_lat@data[, c("ISO3", "LON", "LAT")]
+lon_lat_merge <- lon_lat@data[, c("ISO3", "LON", "LAT")]
 map <-
-  sp::merge(map, MergeColumns, by.x = "ISO3", duplicateGeoms = TRUE)
+  sp::merge(map, lon_lat_merge, by.x = "ISO3", duplicateGeoms = TRUE)
 
 ##--------------------------------------------------##
 ## User Interface Shiny                             ##
@@ -111,7 +111,7 @@ ui <- fluidPage(
       ),
       
       leaflet::leafletOutput(
-        outputId = "map1",
+        outputId = "display_map",
         height = "100%",
         width = "100%"
       )
@@ -375,7 +375,7 @@ server <- function(input, output, session) {
   })
   
   # create reactive data output
-  output$map1 <- leaflet::renderLeaflet({
+  output$display_map <- leaflet::renderLeaflet({
     foundation_map()
     
   })
@@ -388,7 +388,7 @@ server <- function(input, output, session) {
     # Choose data based on selected input
     datafiltered <- filteredData()
     
-    # match selected rows and columns in data with spacial data
+    # match selected rows and columns in data with spatial data
     ordercounties <- match(map@data$ISO3, datafiltered$ISO3)
     map@data <- datafiltered[ordercounties,]
     
@@ -447,7 +447,7 @@ server <- function(input, output, session) {
       "Mit Mausklick zum Länderprofil"
     ) %>%
       lapply(htmltools::HTML)
-    # Transform shapefile for poligon input
+    # Transform shapefile for polygon input
     map_ll <- spTransform(map, CRS("+init=epsg:4326"))
     
     map_conf$map <- map_ll
@@ -457,7 +457,7 @@ server <- function(input, output, session) {
     map_conf$Llabels <- Llabels
     
     # Create Map
-    l <- leaflet::leafletProxy("map1", data = map_ll) %>%
+    leaflet::leafletProxy("display_map", data = map_ll) %>%
       clearShapes() %>%
       addPolygons(
         fillColor = ~ pal(variableplot),
@@ -497,7 +497,7 @@ server <- function(input, output, session) {
         labels = Llabels
       )
     
-    proxy <- leaflet::leafletProxy(mapId = "map1", data = trend_data) %>%
+    proxy <- leaflet::leafletProxy(mapId = "display_map", data = trend_data) %>%
       clearMarkers()
     
     # marker für Trend
@@ -521,7 +521,7 @@ server <- function(input, output, session) {
     
   })
   
-  user_created_map <- reactive({
+  download_map <- reactive({
     # Appearently, we need to basically recreate the whole thing, as there
     # is no obvious way to retrieve the leafletProxy changes and re apply them
     # to the leaflet widget..
@@ -529,7 +529,7 @@ server <- function(input, output, session) {
     # However, a workaround would consist in lot of redundancy,
     # and probably long waiting time. But it works :P
     
-    output_map <-
+    m <-
       leaflet::leaflet(map_conf$map) %>%
       addTiles(urlTemplate = 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png') %>%
       addProviderTiles(provider = "CartoDB.PositronNoLabels") %>%
@@ -561,9 +561,9 @@ server <- function(input, output, session) {
         labels   = map_conf$Llabels
       )  %>%
       setView(
-        lng  = input$map1_center$lng,
-        lat  = input$map1_center$lat,
-        zoom = input$map1_zoom
+        lng  = input$display_map_center$lng,
+        lat  = input$display_map_center$lat,
+        zoom = input$display_map_zoom
       )
     
     if (input$var_trend) {
@@ -585,7 +585,7 @@ server <- function(input, output, session) {
         )
     }
     
-    return(output_map)
+    return(m)
     
   })
   
@@ -597,7 +597,7 @@ server <- function(input, output, session) {
     ,
     content = function(file) {
       webshot::mapshot(
-        x = user_created_map()
+        x = download_map()
         ,
         file = file
         ,
