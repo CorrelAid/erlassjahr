@@ -56,7 +56,7 @@ lon_lat <- readOGR(dsn = path.expand(shape_path),
 fr_guiana <- lon_lat[lon_lat$ISO3 == "GUF", ]
 fr_guiana@data <- fr_guiana@data[c("ISO3", "NAME")]
 fr_guiana@data <-
-  rename(fr_guiana@data, iso_a3 = ISO3, geounit = NAME)
+  dplyr::rename(fr_guiana@data, iso_a3 = ISO3, geounit = NAME)
 # Rename the Polygon ID to 255 to have unique ones
 slot(slot(fr_guiana, "polygons")[[1]], "ID") = "255"
 
@@ -71,7 +71,7 @@ data[data == ""] <- NA
 data$url <- paste0("<a href='", data$link, "'>", data$ISO3, "</a>")
 
 # rename colum to match sp file
-data <- rename(data, iso_a3 = ISO3)
+data <- dplyr::rename(data, iso_a3 = ISO3)
 
 # Use naturalearth shapefile
 sp_data <-
@@ -89,7 +89,7 @@ sp_data@data[sp_data@data$geounit == "Kosovo", "iso_a3"] <- "RKS"
 
 # combine data
 map <- sp::merge(sp_data, data, by.x = "iso_a3", duplicateGeoms = TRUE)
-map@data <- rename(map@data, ISO3 = iso_a3)
+map@data <- dplyr::rename(map@data, ISO3 = iso_a3)
 lon_lat_merge <- lon_lat@data[, c("ISO3", "LON", "LAT")]
 map <-
   sp::merge(map, lon_lat_merge, by.x = "ISO3", duplicateGeoms = TRUE)
