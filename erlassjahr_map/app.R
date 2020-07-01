@@ -235,46 +235,22 @@ server <- function(input, output, session) {
 
   # Select Data according to input
   filteredData <- reactive({
-    col_risiko <- findColNumber(map@data, input$var_risiko)
+    selected_regions <- input$var_region
+    selected_incomes <- input$var_income
 
-    if (input$var_income == "Alle" &
-      input$var_region == "Alle" & input$var_risiko == "None") {
-      data <- map@data
-    } else if (input$var_income != "Alle" &
-      input$var_region == "Alle" & input$var_risiko == "None") {
-      data <- subset(map@data, income == input$var_income)
-    } else if (input$var_income == "Alle" &
-      input$var_region != "Alle" & input$var_risiko == "None") {
-      data <- subset(map@data, region == input$var_region)
-    } else if (input$var_income != "Alle" &
-      input$var_region != "Alle" & input$var_risiko == "None") {
-      data <-
-        subset(
-          map@data,
-          region == input$var_region & income == input$var_income
-        )
-    } else if (input$var_income == "Alle" &
-      input$var_region == "Alle" & input$var_risiko != "None") {
-      data <- subset(map@data, map@data[, col_risiko] == 1)
-    } else if (input$var_income != "Alle" &
-      input$var_region == "Alle" & input$var_risiko != "None") {
-      data <-
-        subset(map@data, income == input$var_income &
-          map@data[, col_risiko] == 1)
-    } else if (input$var_income == "Alle" &
-      input$var_region != "Alle" & input$var_risiko != "None") {
-      data <-
-        subset(map@data, region == input$var_region &
-          map@data[, col_risiko] == 1)
-    } else {
-      data <-
-        subset(
-          map@data,
-          region == input$var_region &
-            income == input$var_income & map@data[, col_risiko] == 1
-        )
+    # if input is "Alle" we want all existing regions / incomes
+    if (selected_regions == "Alle") selected_regions <- unique(map@data$region)
+    if (selected_incomes == "Alle") selected_incomes <- unique(map@data$income)
+
+    data <- map@data %>%
+      dplyr::filter(region %in% selected_regions) %>%
+      dplyr::filter(income %in% selected_incomes)
+
+    if (input$var_risiko != "None") {
+      data <- data %>%
+        filter(!!sym(input$var_risiko) == 1)
     }
-    # add regional input when constructed columns with region input
+    return(data)
   })
 
   filteredTrend <- reactive({
