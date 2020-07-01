@@ -28,11 +28,6 @@ if (!webshot::is_phantomjs_installed()) {
   webshot::install_phantomjs()
 }
 
-
-findColNumber <- function(df, input) {
-  as.numeric(which(colnames(df) == input))
-}
-
 # Implement modules
 m_graphics <- modules::use("modules/graphics.R")
 m_legends <- modules::use("modules/legends.R")
