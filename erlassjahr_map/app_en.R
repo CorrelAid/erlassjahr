@@ -130,7 +130,7 @@ ui <- fluidPage(
       # dropdown input selection Debt Indicator
       selectizeInput(
         inputId = "var_debtindikator",
-        label = "Choose Debt Indicator",
+        label = "choose debt indicator",
         choices = list(
           `aggregated indicators` = "debt_sit_cat2",
           `public debt / GDP` = "public_debt_bip2",
@@ -144,7 +144,7 @@ ui <- fluidPage(
       # drop down input selection income category
       selectInput(
         "var_income",
-        "Choose Income Group",
+        "choose income group",
         choices = list(
           `All` = "Alle",
           `low income` = "l",
@@ -156,7 +156,7 @@ ui <- fluidPage(
       # drop down input selection Region
       selectInput(
         "var_region",
-        "Choose Region",
+        "choose region",
         choices = list(
           `All` = "Alle",
           `South Asia, Southeast Asia, Pacific` = "South Asia, Southeast Asia, Pacific",
@@ -170,7 +170,7 @@ ui <- fluidPage(
       # drop down input selection Risikofaktoren
       selectInput(
         "var_risiko",
-        "Choose Risk Factor",
+        "choose risk factor",
         choices = list(
           `None` = "None",
           `extractivism` = "extractivism",
@@ -183,14 +183,14 @@ ui <- fluidPage(
 
       # Drop down input selection Trend anzeigen
       checkboxInput("var_trend",
-        "Show Debt trend",
+        "show debt trend",
         value = FALSE
       ),
 
       # Drop down input selection Zahlungseinstellungen anzeigen
       checkboxInput(
         "var_zahlung",
-        "Show Persistent and Interim Stop of Payments",
+        "show suspention of payment",
         value = FALSE
       ),
       downloadButton(outputId = "dl"),
