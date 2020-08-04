@@ -65,7 +65,7 @@ slot(slot(fr_guiana, "polygons")[[1]], "ID") <- "255"
 # Load Data
 data <-
   get(load(paste0("data/final_data_", year, ".RData"), e <-
-    new.env()), e)
+             new.env()), e)
 rm(list = ls(envir = e), envir = e)
 
 data[data == ""] <- NA
@@ -108,17 +108,17 @@ ui <- fluidPage(
       tags$style(
         type = "text/css",
         ".outer {position: fixed; top: 0;
-                     left: 0; right: 0; bottom: 0; padding: 0}",
+        left: 0; right: 0; bottom: 0; padding: 0}",
         ".selectize-dropdown-content {max-height: 400px; }"
       ),
-
+      
       leaflet::leafletOutput(
         outputId = "display_map",
         height = "100%",
         width = "100%"
       )
     )),
-
+    
     # Create movable fixed (absolute) side panel
     absolutePanel(
       top = 10,
@@ -130,78 +130,78 @@ ui <- fluidPage(
       # dropdown input selection Debt Indicator
       selectizeInput(
         inputId = "var_debtindikator",
-        label = "choose debt indicator",
+        label = "Select debt indicator",
         choices = list(
           `aggregated indicators` = "debt_sit_cat2",
           `public debt / GDP` = "public_debt_bip2",
-          `public debt / government revenue` = "public_debt_state_rev2",
-          `foreign debt / GDP` = "foreign_debt_bip2",
-          `foreign debt / export earnings` = "foreign_debt_exp2",
-          `foreign debt service / export earnings` = "external_debt_service_exp2"
+          `public debt / annual government revenue` = "public_debt_state_rev2",
+          `external debt / GDP` = "foreign_debt_bip2",
+          `external debt / annual export earnings` = "foreign_debt_exp2",
+          `debt service / annual export earnings` = "external_debt_service_exp2"
         )
       ),
-
+      
       # drop down input selection income category
       selectInput(
         "var_income",
-        "choose income group",
+        "Select income classification",
         choices = list(
-          `All` = "Alle",
+          `all` = "Alle",
           `low income` = "l",
-          `lower-middle income` = "lm",
-          `upper-middle income` = "um",
+          `lower middle income` = "lm",
+          `upper middle income` = "um",
           `high income` = "h"
         )
       ),
       # drop down input selection Region
       selectInput(
         "var_region",
-        "choose region",
+        "Select region",
         choices = list(
-          `All` = "Alle",
-          `South Asia, Southeast Asia, Pacific` = "South Asia, Southeast Asia, Pacific",
-          `Europe, CIS` = "Europe, CIS",
-          `Latin America, Caribbean` = "Latin America, Caribbean",
-          `Middle East, North Africa` = "Middle East, North Africa",
-          `Sub-Saharan Africa` = "Sub-Saharan Africa"
+          `all` = "Alle",
+          `South Asia, Southeast Asia, Pacific` = "Südasien, Südostasien, Pazifik",
+          `Europe, GUS` = "Europa, GUS",
+          `Latin America, Caribbean` = "Lateinamerika, Karibik",
+          `Northern Africa, Middle East` = "Nordafrika, Naher Osten",
+          `Sub-Saharan Africa` = "Subsahara-Afrika"
         )
       ),
-
+      
       # drop down input selection Risikofaktoren
       selectInput(
         "var_risiko",
-        "choose risk factor",
+        "Select risk factor",
         choices = list(
           `None` = "None",
           `extractivism` = "extractivism",
           `political and social fragility` = "fragility",
-          `debt structure` = "debt_prob",
-          `natural disasters / climate change` = "vulnerability",
+          `problematic debt structure` = "debt_prob",
+          `external shocks / climate change` = "vulnerability",
           selected = NULL
         )
       ),
-
+      
       # Drop down input selection Trend anzeigen
       checkboxInput("var_trend",
-        "show debt trend",
-        value = FALSE
+                    "Show debt trend",
+                    value = FALSE
       ),
-
+      
       # Drop down input selection Zahlungseinstellungen anzeigen
       checkboxInput(
         "var_zahlung",
-        "show suspention of payment",
+        "Show suspension of payment",
         value = FALSE
       ),
       downloadButton(outputId = "dl"),
       actionButton(
         inputId = "Method",
-        label = HTML("Methodology: Debt Report&nbsp;&nbsp;&nbsp; <br/> from erlassjahr.de and Misereor"),
+        label = HTML("Methodology: Debt monitor&nbsp;&nbsp;&nbsp; <br/> from erlassjahr.de and Misereor"),
         icon = icon("th"),
         onclick = "window.open('https://erlassjahr.de/produkt-kategorie/schuldenreporte/')"
       )
     )
-  )
+    )
 )
 
 ## --------------------------------------------------##
@@ -213,11 +213,12 @@ ui <- fluidPage(
 choiceVec <- c(
   "aggregated indicators" = "debt_sit_cat2",
   "public debt / GDP" = "public_debt_bip2",
-  "public debt / government revenue" = "public_debt_state_rev2",
-  "foreign debt / GDP" = "foreign_debt_bip2",
-  "foreign debt / export earnings" = "foreign_debt_exp2",
-  "foreign debt service / export earnings" = "external_debt_service_exp2"
+  "public debt / annual government revenue" = "public_debt_state_rev2",
+  "external debt / GDP" = "foreign_debt_bip2",
+  "external debt / annual export earnings" = "foreign_debt_exp2",
+  "debt service / annual export earnings" = "external_debt_service_exp2"
 )
+
 
 content <- paste0(sep = "<b>", "Source erlassjahr.de", "</b>")
 
@@ -227,27 +228,27 @@ content <- paste0(sep = "<b>", "Source erlassjahr.de", "</b>")
 ## --------------------------------------------------##
 
 server <- function(input, output, session) {
-
+  
   # Select Data according to input
   filteredData <- reactive({
     selected_regions <- input$var_region
     selected_incomes <- input$var_income
-
-    # if input is "All" we want all existing regions / incomes
-    if (selected_regions == "All") selected_regions <- unique(map@data$region)
-    if (selected_incomes == "All") selected_incomes <- unique(map@data$income)
-
+    
+    # if input is "Alle" we want all existing regions / incomes
+    if (selected_regions == "Alle") selected_regions <- unique(map@data$region)
+    if (selected_incomes == "Alle") selected_incomes <- unique(map@data$income)
+    
     data <- map@data %>%
       dplyr::filter(region %in% selected_regions) %>%
       dplyr::filter(income %in% selected_incomes)
-
+    
     if (input$var_risiko != "None") {
       data <- data %>%
         filter(!!sym(input$var_risiko) == 1)
     }
     return(data)
   })
-
+  
   filteredTrend <- reactive({
     if (input$var_debtindikator == "debt_sit_cat2") {
       trend_var <- "trend_new"
@@ -263,7 +264,7 @@ server <- function(input, output, session) {
       trend_var <- "trend_edse_new"
     }
   })
-
+  
   legendLabels <- reactive({
     if (input$var_debtindikator %in% c(
       "debt_sit_cat2", "public_debt_bip2", "public_debt_state_rev2",
@@ -274,7 +275,7 @@ server <- function(input, output, session) {
       legende <- debt_legends[["default"]]
     }
   })
-
+  
   mouseSymb <- reactive({
     if (input$var_debtindikator == "debt_sit_cat2") {
       var <- ""
@@ -282,7 +283,7 @@ server <- function(input, output, session) {
       var <- "%"
     }
   })
-
+  
   # Create Basemap:
   foundation_map <- reactive({
     leaflet::leaflet(map, options = leaflet::leafletOptions(minZoom = 2, maxZoom = 10)) %>% #
@@ -290,55 +291,55 @@ server <- function(input, output, session) {
       addProviderTiles(provider = "CartoDB.PositronNoLabels") %>%
       setView(0, 15, 2)
   })
-
+  
   # create reactive data output
   output$display_map <- leaflet::renderLeaflet({
     foundation_map()
   })
-
-
+  
+  
   map_conf <- reactiveValues()
-
+  
   # Display colored countries dependent on the output
   observe({
     # Choose data based on selected input
     datafiltered <- filteredData()
-
+    
     # match selected rows and columns in data with spatial data
     ordercounties <- match(map@data$ISO3, datafiltered$ISO3)
     map@data <- datafiltered[ordercounties, ]
-
+    
     # Select Polygons for Debtindikator
     map$variableplot <- map@data[, input$var_debtindikator]
-
+    
     # map url
     state_popup <-
       paste0(
         "<a href=\'",
         map@data$link,
-        "', target=\"_blank\">Go to countr profile. (German only) </a>"
+        "', target=\"_blank\">Go to country profile (German only) </a>"
       )
-
+    
     # Select input for mouseover text
     map$mouseover <-
       map@data[, gsub(".$", "", input$var_debtindikator)]
-
+    
     # Select input for markers
     trendfilter <- filteredTrend()
     trend_data <-
       map@data[, which(names(map@data) %in% c("LON", "LAT", trendfilter))]
     trend_data <- trend_data[complete.cases(trend_data), ]
-
+    
     trend_data$trendinput <-
       trend_data[, which(colnames(trend_data) == trendfilter)]
-
+    
     # data für feuersymbole
     pay_data <- map@data[!is.na(map@data$payment_stop), ]
-
+    
     # data für links
     link_data <- map@data[!is.na(map@data$link), ]
-
-
+    
+    
     # Create color palette for Debtindicator
     pal <-
       colorFactor(
@@ -348,7 +349,7 @@ server <- function(input, output, session) {
       )
     # Create list of labels for legend
     Llabels <- legendLabels()
-
+    
     # Create text shown when mouse glides over countries
     mytext <- paste0(
       "<b>",
@@ -362,18 +363,18 @@ server <- function(input, output, session) {
       mouseSymb(),
       "</b>",
       "<br/>",
-      "Click for contry profile"
+      "Click for country profile"
     ) %>%
       lapply(htmltools::HTML)
     # Transform shapefile for polygon input
     map_ll <- spTransform(map, CRS("+init=epsg:4326"))
-
+    
     map_conf$map <- map_ll
     map_conf$pal <- pal
     map_conf$trend_data <- trend_data
     map_conf$pay_data <- pay_data
     map_conf$Llabels <- Llabels
-
+    
     # Create Map
     leaflet::leafletProxy("display_map", data = map_ll) %>%
       clearShapes() %>%
@@ -413,10 +414,10 @@ server <- function(input, output, session) {
         title = "Debt Situation",
         labels = Llabels
       )
-
+    
     proxy <- leaflet::leafletProxy(mapId = "display_map", data = trend_data) %>%
       clearMarkers()
-
+    
     # marker für Trend
     if (input$var_trend) {
       proxy %>% addMarkers(
@@ -436,15 +437,15 @@ server <- function(input, output, session) {
       )
     }
   })
-
+  
   download_map <- reactive({
     # Appearently, we need to basically recreate the whole thing, as there
     # is no obvious way to retrieve the leafletProxy changes and re apply them
     # to the leaflet widget..
-
+    
     # However, a workaround would consist in lot of redundancy,
     # and probably long waiting time. But it works :P
-
+    
     m <-
       leaflet::leaflet(map_conf$map) %>%
       addTiles(urlTemplate = "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png") %>%
@@ -481,7 +482,7 @@ server <- function(input, output, session) {
         lat = input$display_map_center$lat,
         zoom = input$display_map_zoom
       )
-
+    
     if (input$var_trend) {
       output_map <- output_map %>%
         addMarkers(
@@ -490,8 +491,8 @@ server <- function(input, output, session) {
           icon = ~ pfeilIcons[map_conf$trend_data$trendinput]
         )
     }
-
-
+    
+    
     if (input$var_zahlung) {
       output_map <- output_map %>%
         addMarkers(
@@ -500,10 +501,10 @@ server <- function(input, output, session) {
           icon = ~ feuerIcons[map_conf$pay_data$payment_stop]
         )
     }
-
+    
     return(m)
   })
-
+  
   output$dl <- shiny::downloadHandler(
     filename = paste0(
       Sys.Date(),
