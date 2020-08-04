@@ -30,7 +30,7 @@ if (!webshot::is_phantomjs_installed()) {
 
 # Implement modules
 m_graphics <- modules::use("modules/graphics.R")
-m_legends <- modules::use("modules/legends.R")
+m_legends <- modules::use("modules/legends_en.R")
 
 feuerIcons <- m_graphics$feuer_icons()
 pfeilIcons <- m_graphics$pfeil_icons()
