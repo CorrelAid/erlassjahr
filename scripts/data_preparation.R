@@ -14,7 +14,7 @@ library(readxl)
 library(dplyr)
 library(english)
 
-# load all required functions from the helper file
+# load required functions from the helper file
 source("scripts/functions.R")
 
 # create year_data with current year to let the app know the building year

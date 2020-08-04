@@ -9,7 +9,7 @@
 ## Prerequisits ##
 ##--------------##
 
-library(magrittr) # A Forward-Pipe Operator for R
+library(magrittr) # Forward-Pipe Operator for R
 library(countrycode) # Convert Country Names and Country Codes
 library(dplyr) # A Grammar of Data Manipulation
 library(writexl) # Export Data Frames to Excel 'xlsx' Format
