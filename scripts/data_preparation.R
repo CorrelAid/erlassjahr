@@ -88,7 +88,7 @@ sr_df$external_debt_service_exp2 <-
 ##########################
 
 # accumulated debt indicators
-sr_df$debt_sit_total <- rowSums(sr_df[, c(24:28)], na.rm = TRUE)
+sr_df$debt_sit_total <- rowSums(sr_df[, c(25:29)], na.rm = TRUE)
 
 # use accumulated debt indicator value to categorize states' debt situation
 sr_df$debt_sit_cat2 <-

@@ -32,6 +32,7 @@ sr_df <- sr_df %>%
     country,
     region,
     oecd,
+    not_critical,
     no_data,
     extractivism,
     fragility,
