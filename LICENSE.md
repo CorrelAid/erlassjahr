@@ -1,12 +1,13 @@
 # License
 ## Data
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons Licence" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png" /></a><br
+
 The data in this repository is licensed by Erlassjahr e.V. under a [Creative Commons Attribution-ShareAlike 4.0 International Public License](https://creativecommons.org/licenses/by-sa/4.0/). 
 This applies to the following files:
 - all files contained in `data` folder: 
 - all files contained in `erlassjahr_map/data/` folder 
 
 Please see [here](https://creativecommons.org/licenses/by-sa/4.0/) for the license deeds and the full license.
-<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons Licence" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
 
 ## Code
 All files except the files mentioned above are licensed by CorrelAid e.V. under a MIT License. 
