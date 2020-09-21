@@ -1,8 +1,8 @@
 # License
 ## Data
-<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons Licence" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png" /></a>
+ [![License: CC BY-SA 4.0](https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-sa/4.0/)
 
-The data in this repository is licensed by Erlassjahr e.V. under a [Creative Commons Attribution-ShareAlike 4.0 International Public License](https://creativecommons.org/licenses/by-sa/4.0/). 
+The data in this repository is licensed by [Erlassjahr e.V.](https://erlassjahr.de/en) under a [Creative Commons Attribution-ShareAlike 4.0 International Public License](https://creativecommons.org/licenses/by-sa/4.0/). 
 This applies to the following:
 - all files contained in the `data` folder: 
 - all files contained in the `erlassjahr_map/data/` folder 
@@ -10,7 +10,9 @@ This applies to the following:
 Please see [here](https://creativecommons.org/licenses/by-sa/4.0/) for the license deeds and the full license.
 
 ## Code
-All files except the files mentioned above are licensed by CorrelAid e.V. under a MIT License. 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+ 
+All files except the files mentioned above are licensed by [CorrelAid e.V.](https://corelaid.org/en) under a MIT License. 
 
 MIT License
 
