@@ -74,7 +74,7 @@ There are 4 main components to this repository.
 
 Besides files to setup the Rproject and to make sure that all dependencies are loaded (using [`renv`](https://rstudio.github.io/renv/articles/renv.html)), the root has three important files that detail how to use this repo to setup the automated data generation process and how to publish the ShinyApp (for more details, see the project description here).
 
-- `main.Rmd` is the main file where that executes all scripts to setup an excel template, to process the data and to deploy the ShinyApp. More details can be found in the two .docx files in the root and the [project description]().
+- `main.Rmd` is the main file where that executes all scripts to setup an excel template, to process the data and to deploy the ShinyApp. More details can be found in the two .docx files in the root and the project description.
 - `Anleitung_zur_Excel_Vorlage.docx` is a description of how to execute the first part of the `main.Rmd` to generate a new Excel file containing the static information from the previous year as well as scraping information from the World Bank API (using the [`WDI`](https://www.r-project.org/nosvn/pandoc/WDI.html) package in R). To allow further comments and fully customization, this file is a .docx
 - `Anleitung_Update_Karte.docx` details the second part in the `main.Rmd` and specifies the steps required to automatically categorize states and how to eventually update and deploy the shinyapp. Again, for customization, this file is a .docx.
 
