@@ -26,18 +26,18 @@ runApp('erlassjahr_map/app_en.R') # english version
 ```
 
 # License information
-Please see [LICENSE.md](https://github.com/CorrelAid/erlassjahr/blob/master/LICENSE.md) for more detailed information.
 
-## Data
+### Data
 [![License: CC BY-SA 4.0](https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-sa/4.0/)
 
 The data is licensed by [Erlassjahr e.V.](https://erlassjahr.de/en) under a
-[Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by-sa/4.0).
+[Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by-sa/4.0). Please see [LICENSE.md](https://github.com/CorrelAid/erlassjahr/blob/master/LICENSE.md) for more detailed information.
 
-## Code 
+### Code 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-The code is licensed by [CorrelAid e.V.](https://correlaid.org/en) under a MIT License.
+The code is licensed by [CorrelAid e.V.](https://correlaid.org/en) under a MIT License. Please see [LICENSE.md](https://github.com/CorrelAid/erlassjahr/blob/master/LICENSE.md) for more detailed information.
+
 
 
 # Repo structure
