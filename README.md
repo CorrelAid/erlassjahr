@@ -11,22 +11,36 @@ The goal of [CorrelAid](https://www.correlaid.org) was to help the team of erlas
 
 A detailed description of the project, its implementation and the impact can be found in the project description here.
 
-## License information
+# Run locally
+In order to run the app locally, do the following:
+
+1. clone this repository
+2. setup R environment 
+```
+renv::restore()
+```
+3. Run app
+```
+runApp('erlassjahr_map/app.R') # german version
+runApp('erlassjahr_map/app_en.R') # english version
+```
+
+# License information
 Please see [LICENSE.md](https://github.com/CorrelAid/erlassjahr/blob/master/LICENSE.md) for more detailed information.
 
-### Data
+## Data
 [![License: CC BY-SA 4.0](https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-sa/4.0/)
 
 The data is licensed by [Erlassjahr e.V.](https://erlassjahr.de/en) under a
 [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by-sa/4.0).
 
-### Code 
+## Code 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 The code is licensed by [CorrelAid e.V.](https://correlaid.org/en) under a MIT License.
 
 
-## Repo structure
+# Repo structure
 
 Below is a (reduced) structure of the repo. 
 
